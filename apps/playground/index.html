@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Handscroll playground</title>
+  </head>
+  <body>
+    <div id="hud">
+      <strong>Handscroll</strong>
+      <span id="hud-scroll">loading…</span>
+      <span id="hud-cam"></span>
+      <label>
+        quality
+        <select id="quality">
+          <option value="auto">auto</option>
+          <option value="low">low</option>
+          <option value="medium">medium</option>
+          <option value="high">high</option>
+        </select>
+      </label>
+      <span class="hint">drag to pan · wheel to zoom</span>
+    </div>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
