@@ -443,6 +443,7 @@ interface HitResult {
 | `plan/10-core-engine.md` | **核心引擎层**详细实现：包结构、契约、实现顺序、验证脚本、测试用例 |
 | `plan/20-plugin-layer.md` | **插件层**详细实现：ScrollPlugin 契约、内置插件、隔离与测试 |
 | `plan/30-business-layer.md` | **业务层**详细实现：Content Pack、schema、story、作者脚本与测试 |
+| `plan/40-qingming-riverside-app.md` | **应用层**：基于 third_party 素材做清明上河图式 content pack |
 | `plan/02-content-workflow.md` | 放图→切图→剧情→验证短手册（待写，可从 30 压缩） |
 | `plan/03-reference-audit.md` | 参考仓库审计（待写） |
 | `plan/adr/0001-renderer-topology.md` | 双 Canvas vs 主渲染器 |
