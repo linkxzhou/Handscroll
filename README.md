@@ -11,6 +11,8 @@ Package manager is **Yarn Berry 4** with `nodeLinker: node-modules` (a real `nod
 ```bash
 corepack enable          # once, if `yarn -v` is still 1.x
 yarn install
+yarn dev                 # http://localhost:5174/ gallery home
+                         # pack: http://localhost:5174/?scroll=qingming-riverside
 
 # generate the synthetic demo painting + tile pyramid
 yarn content:generate-demo
@@ -23,9 +25,9 @@ yarn typecheck
 yarn test:unit
 yarn test:dep          # core must not import pixi.js / three
 
-yarn viewer            # public face — gallery home at http://localhost:5174/
-                       # open a pack: http://localhost:5174/?scroll=qingming-riverside
-yarn playground        # engine HUD sandbox — http://localhost:5173/?scroll=demo-scroll
+yarn playground          # engine HUD sandbox — http://localhost:5173/?scroll=demo-scroll
+yarn viewer              # alias for yarn dev
+yarn content:preview     # alias for yarn dev
 
 # first real content pack (stitched riverside)
 yarn content:tiles --id qingming-riverside   # if tiles/ is missing
@@ -49,7 +51,7 @@ yarn content:scaffold-scene --id my-scroll
 yarn content:validate --id my-scroll
 ```
 
-The viewer home (`yarn viewer`, `/`) discovers `contents/*/meta.json` (skipping `_template`). A new published pack shows up as a card without editing the app.
+The viewer home (`yarn dev`, `/`) discovers `contents/*/meta.json` (skipping `_template`). A new published pack shows up as a card without editing the app.
 
 v1 does **not** call an image-gen API. See `tools/image-gen/README.md`.
 

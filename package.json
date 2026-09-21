@@ -19,6 +19,7 @@
     "test:engine": "vitest run packages/core packages/tiles packages/assets packages/interaction",
     "test:plugins": "vitest run packages/plugins packages/core",
     "test:content": "vitest run packages/scene tools/scene-validator",
+    "dev": "yarn workspace @handscroll/viewer dev",
     "playground": "yarn workspace @handscroll/playground dev",
     "viewer": "yarn workspace @handscroll/viewer dev",
     "content:new": "node tools/content-new.mjs",

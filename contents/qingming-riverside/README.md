@@ -5,7 +5,7 @@ Handscroll content pack `qingming-riverside`. First real painting pack: stitch, 
 ## Open
 
 ```bash
-yarn viewer
+yarn dev
 # gallery: http://localhost:5174/
 # this pack: http://localhost:5174/?scroll=qingming-riverside
 
