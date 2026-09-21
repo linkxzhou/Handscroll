@@ -19,6 +19,7 @@ describe("qingming-riverside pack load Q-A-02", () => {
     expect(meta.width).toBe(6516);
     expect(meta.height).toBe(724);
     expect(meta.plugins).toEqual(["quality", "guide", "audio", "weather", "water"]);
+    expect(meta.defaultViewport.centerX).toBe(3120);
     expect(scene.chapters.map((c) => c.id)).toEqual(["watermill", "teahouse", "bridge", "gate"]);
     expect(scene.entities.some((e) => e.id === "ferry-boat" && e.type === "sprite")).toBe(true);
     expect(scene.entities.some((e) => e.id === "bridge-event" && e.type === "hotspot")).toBe(true);
