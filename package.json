@@ -10,6 +10,7 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
+    "test": "vitest run",
     "test:dep": "node tools/check-deps.mjs",
     "test:engine": "vitest run packages/core packages/tiles packages/assets packages/interaction",
     "test:plugins": "vitest run packages/plugins packages/core",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.13.10",
+    "happy-dom": "^17.4.4",
     "typescript": "^5.8.2",
     "vitest": "^3.0.8",
     "tsx": "^4.19.3"

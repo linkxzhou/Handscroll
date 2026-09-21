@@ -26,6 +26,27 @@ pnpm viewer            # http://localhost:5174/?scroll=demo-scroll
 
 Drag to pan, wheel to zoom. No story script is required to browse tiles.
 
+## Tests
+
+```bash
+pnpm test:unit          # Vitest — viewport, gestures, tiles/LOD, PluginHost, schemas, Pixi/Three math, playground query helpers
+pnpm test:engine        # subset: core / tiles / assets / interaction
+pnpm test:plugins
+pnpm test:content       # scene Zod + scene-validator
+pnpm test:dep           # packages/core must not import pixi.js or three
+pnpm typecheck
+```
+
+`pnpm test:unit` is the gate: every test file must pass (no skips used as a way to hide failures).
+
+**Playwright / browser e2e is not wired.** Agents and CI here have no installed Playwright browser project, and WebGL/headed Chrome was flaky (GPU + process EIO) even when system Chrome was present. Pan/zoom is covered instead by deterministic engine-hook tests:
+
+- `ViewportController` screen↔world, zoom-about-point, clamp, flyTo interrupt
+- `TileManager` visible-set + LOD after pan/zoom
+- Pixi `worldRootTransform` matching the camera
+- `ScrollEngine.loadContent` with stub renderers (happy-dom)
+
+
 ## New content pack
 
 ```bash

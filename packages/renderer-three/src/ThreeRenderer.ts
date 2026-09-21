@@ -6,22 +6,22 @@ import {
   WebGLRenderer,
   type WebGLRendererParameters,
 } from "three";
+import { orthoCameraFromViewport } from "./orthoMath.ts";
 
 export function syncOrthoCamera(
   camera: OrthographicCamera,
   viewport: ViewportState,
   distance = 1000,
 ): void {
-  const visW = viewport.screenWidth / viewport.zoom;
-  const visH = viewport.screenHeight / viewport.zoom;
-  camera.left = -visW / 2;
-  camera.right = visW / 2;
-  camera.top = visH / 2;
-  camera.bottom = -visH / 2;
-  camera.near = 0.1;
-  camera.far = distance * 4;
-  camera.position.set(viewport.centerX, -viewport.centerY, distance);
-  camera.lookAt(viewport.centerX, -viewport.centerY, 0);
+  const pose = orthoCameraFromViewport(viewport, distance);
+  camera.left = pose.left;
+  camera.right = pose.right;
+  camera.top = pose.top;
+  camera.bottom = pose.bottom;
+  camera.near = pose.near;
+  camera.far = pose.far;
+  camera.position.set(pose.position.x, pose.position.y, pose.position.z);
+  camera.lookAt(pose.lookAt.x, pose.lookAt.y, pose.lookAt.z);
   camera.updateProjectionMatrix();
 }
 

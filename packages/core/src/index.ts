@@ -27,4 +27,5 @@ export { PluginHost } from "./PluginHost.ts";
 export { ViewportController } from "./viewport/ViewportController.ts";
 export { InputManager } from "./input/InputManager.ts";
 export { GestureState, DRAG_THRESHOLD_PX } from "./input/GestureState.ts";
+export { isUiPointerTarget, UI_POINTER_SELECTOR } from "./input/uiTarget.ts";
 export { RenderScheduler } from "./scheduler/RenderScheduler.ts";

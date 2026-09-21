@@ -4,12 +4,17 @@ import { PluginHost } from "./PluginHost.ts";
 import { RenderScheduler } from "./scheduler/RenderScheduler.ts";
 import type { EngineContext, ScrollPlugin } from "./contracts/plugin.ts";
 import type { HitResult } from "./contracts/hit.ts";
+import type { SceneDocument } from "./contracts/engine.ts";
 
 function stubCtx(): EngineContext {
   return {
     engine: {
       events: new EventBus(),
-      camera: { getState: () => ({ centerX: 0, centerY: 0, zoom: 1, screenWidth: 1, screenHeight: 1 }), flyTo: () => {}, interruptTransition: () => {} },
+      camera: {
+        getState: () => ({ centerX: 0, centerY: 0, zoom: 1, screenWidth: 1, screenHeight: 1 }),
+        flyTo: () => {},
+        interruptTransition: () => {},
+      },
       scheduler: { requestFrame: () => {}, wake: () => {}, requestContinuous: () => {}, releaseContinuous: () => {} },
       getViewport: () => ({ centerX: 0, centerY: 0, zoom: 1, screenWidth: 1, screenHeight: 1 }),
       setQuality: () => {},
@@ -31,6 +36,14 @@ function stubCtx(): EngineContext {
   };
 }
 
+const scene = (id = "demo"): SceneDocument => ({
+  version: 1,
+  meta: { id, width: 100, height: 50 },
+  background: { manifestUrl: "./tiles/manifest.json" },
+  entities: [],
+  chapters: [],
+});
+
 describe("EventBus E-U-13", () => {
   it("does not call handlers after off", () => {
     const bus = new EventBus();
@@ -44,9 +57,31 @@ describe("EventBus E-U-13", () => {
     bus.emit("ping");
     expect(n).toBe(1);
   });
+
+  it("unsubscribes via the function returned from on()", () => {
+    const bus = new EventBus();
+    let n = 0;
+    const off = bus.on("x", () => {
+      n += 1;
+    });
+    off();
+    bus.emit("x");
+    expect(n).toBe(0);
+  });
+
+  it("clear drops remaining listeners", () => {
+    const bus = new EventBus();
+    let n = 0;
+    bus.on("x", () => {
+      n += 1;
+    });
+    bus.clear();
+    bus.emit("x");
+    expect(n).toBe(0);
+  });
 });
 
-describe("PluginHost P-U-01..03", () => {
+describe("PluginHost P-U-01..04", () => {
   it("broadcasts frames in priority order (P-U-01)", () => {
     const host = new PluginHost({});
     host.setContext(stubCtx());
@@ -83,6 +118,13 @@ describe("PluginHost P-U-01..03", () => {
     expect(hits).toEqual(["first"]);
   });
 
+  it("lets the default path run when no plugin swallows the hit", () => {
+    const host = new PluginHost({});
+    host.use({ id: "noop", onHit: () => undefined });
+    const hit: HitResult = { entityId: "x", renderer: "pixi", interactionPriority: 0, worldX: 1, worldY: 1 };
+    expect(host.dispatchHit(hit)).toBe(false);
+  });
+
   it("destroyAll calls onDestroy and later frames are skipped (P-U-03)", async () => {
     const host = new PluginHost({});
     let frames = 0;
@@ -117,6 +159,47 @@ describe("PluginHost P-U-01..03", () => {
     expect(host.listIds()).toEqual(["known"]);
     expect(warns.some((w) => w.includes("nope"))).toBe(true);
   });
+
+  it("throws on unknown plugin ids when policy is throw", async () => {
+    const host = new PluginHost({}, "throw");
+    await expect(host.loadBuiltins(["missing"])).rejects.toThrow(/Unknown plugin id "missing"/);
+  });
+
+  it("rejects a duplicate plugin id", () => {
+    const host = new PluginHost({});
+    host.use({ id: "quality" });
+    expect(() => host.use({ id: "quality" })).toThrow(/already registered/);
+  });
+
+  it("runs scene load then unload hooks", async () => {
+    const host = new PluginHost({});
+    const log: string[] = [];
+    host.use({
+      id: "guide",
+      onSceneLoad: (s) => {
+        log.push(`load:${s.meta.id}`);
+      },
+      onSceneUnload: () => {
+        log.push("unload");
+      },
+    });
+    await host.broadcastSceneLoad(scene("pack-a"));
+    await host.broadcastSceneUnload();
+    expect(log).toEqual(["load:pack-a", "unload"]);
+  });
+
+  it("calls onRegister when use() runs after setContext", () => {
+    const host = new PluginHost({});
+    host.setContext(stubCtx());
+    let registered = 0;
+    host.use({
+      id: "q",
+      onRegister: () => {
+        registered += 1;
+      },
+    });
+    expect(registered).toBe(1);
+  });
 });
 
 describe("RenderScheduler E-U-12", () => {
@@ -145,6 +228,29 @@ describe("RenderScheduler E-U-12", () => {
     expect(queue.length).toBe(1);
     queue.shift()?.(1016);
     expect(frames).toBe(2);
+    expect(queue.length).toBe(0);
+    scheduler.stop();
+  });
+
+  it("stays scheduled while a continuous reason is held", () => {
+    const queue: FrameRequestCallback[] = [];
+    const scheduler = new RenderScheduler({
+      now: () => 0,
+      raf: (cb) => {
+        queue.push(cb);
+        return queue.length;
+      },
+      caf: () => {},
+    });
+    scheduler.start(() => {});
+    queue.shift()?.(0);
+    expect(queue.length).toBe(0);
+    scheduler.requestContinuous("pointer");
+    expect(queue.length).toBe(1);
+    queue.shift()?.(16);
+    expect(queue.length).toBe(1);
+    scheduler.releaseContinuous("pointer");
+    queue.shift()?.(32);
     expect(queue.length).toBe(0);
     scheduler.stop();
   });

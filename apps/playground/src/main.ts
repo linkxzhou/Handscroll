@@ -1,10 +1,11 @@
 import "./style.css";
-import { bootHandscroll, isQuality, parseScrollId } from "./boot.ts";
+import { bootHandscroll } from "./boot.ts";
+import { formatViewportHud, isQuality, parseScrollId } from "./query.ts";
 
 const container = document.querySelector<HTMLElement>("#app");
 if (!container) throw new Error("#app missing");
 
-const scrollId = parseScrollId();
+const scrollId = parseScrollId(location.search);
 const engine = await bootHandscroll(container, scrollId);
 
 const hudScroll = document.querySelector("#hud-scroll");
@@ -21,7 +22,7 @@ quality?.addEventListener("change", () => {
 const tickHud = () => {
   const vp = engine.getViewport();
   if (hudCam) {
-    hudCam.textContent = `z ${vp.zoom.toFixed(2)} · (${vp.centerX.toFixed(0)}, ${vp.centerY.toFixed(0)})`;
+    hudCam.textContent = formatViewportHud(vp);
   }
   requestAnimationFrame(tickHud);
 };

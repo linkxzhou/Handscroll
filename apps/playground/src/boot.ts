@@ -7,7 +7,8 @@ import { createPixiRenderer } from "@handscroll/renderer-pixi";
 import { createLazyThreeRenderer } from "@handscroll/renderer-three";
 import { builtinPlugins } from "@handscroll/plugins";
 import { createFetchResolver } from "@handscroll/scene";
-import type { QualityLevel } from "@handscroll/core";
+
+export { isQuality, parseScrollId, formatViewportHud } from "./query.ts";
 
 export async function bootHandscroll(container: HTMLElement, scrollId: string): Promise<ScrollEngine> {
   const assets = new AssetManager();
@@ -35,13 +36,4 @@ export async function bootHandscroll(container: HTMLElement, scrollId: string): 
   schedulerWake.current = () => engine.scheduler.wake();
   await engine.loadContent(scrollId);
   return engine;
-}
-
-export function parseScrollId(): string {
-  const params = new URLSearchParams(location.search);
-  return params.get("scroll") ?? "demo-scroll";
-}
-
-export function isQuality(value: string): value is QualityLevel {
-  return value === "auto" || value === "low" || value === "medium" || value === "high";
 }

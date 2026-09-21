@@ -2,6 +2,7 @@ import { Application } from "pixi.js";
 import type { RendererAdapter, ViewportState, VisibleTile } from "@handscroll/core";
 import { createWorldRoot } from "./WorldRoot.ts";
 import { TileLayer } from "./TileLayer.ts";
+import { worldRootTransform } from "./worldTransform.ts";
 
 export function createPixiRenderer(): RendererAdapter {
   return new PixiRenderer();
@@ -56,11 +57,9 @@ class PixiRenderer implements RendererAdapter {
   }
 
   sync(viewport: ViewportState): void {
-    this.world.scale.set(viewport.zoom);
-    this.world.position.set(
-      viewport.screenWidth / 2 - viewport.centerX * viewport.zoom,
-      viewport.screenHeight / 2 - viewport.centerY * viewport.zoom,
-    );
+    const pose = worldRootTransform(viewport);
+    this.world.scale.set(pose.scale);
+    this.world.position.set(pose.x, pose.y);
   }
 
   setTiles(tiles: readonly VisibleTile[]): void {

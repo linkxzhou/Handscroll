@@ -1,6 +1,7 @@
 import type { ViewportController } from "../viewport/ViewportController.ts";
 import type { RenderScheduler } from "../scheduler/RenderScheduler.ts";
 import { GestureState } from "./GestureState.ts";
+import { isUiPointerTarget } from "./uiTarget.ts";
 
 export interface InputManagerOptions {
   /** When true, wheel events call preventDefault (fullscreen viewer). */
@@ -38,8 +39,7 @@ export class InputManager {
 
     this.onPointerDown = (ev) => {
       if (ev.button !== 0 && ev.pointerType === "mouse") return;
-      const target = ev.target as HTMLElement | null;
-      if (target?.closest("button, a, input, select, textarea, label, .guide-rail")) return;
+      if (isUiPointerTarget(ev.target)) return;
       this.camera.interruptTransition();
       this.scheduler.releaseContinuous("camera");
       this.target.setPointerCapture(ev.pointerId);
