@@ -44,7 +44,7 @@ export function scrollHref(id: string): string {
 
 export function coverUrlForPack(id: string, hasCover: boolean): string | null {
   if (hasCover) return `/contents/${id}/preview/cover.webp`;
-  return `/contents/${id}/tiles/0/0_0.webp`;
+  return null;
 }
 
 export function unwrapModule(mod: unknown): unknown {

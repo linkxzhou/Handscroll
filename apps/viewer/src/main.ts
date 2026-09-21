@@ -1,3 +1,4 @@
+import "./style.css";
 import { ScrollEngine } from "@handscroll/core";
 import { AssetManager } from "@handscroll/assets";
 import { TileManager } from "@handscroll/tiles";

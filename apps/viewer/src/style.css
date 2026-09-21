@@ -332,8 +332,12 @@ body.is-home {
 
 .pack-card--secondary {
   display: grid;
-  grid-template-columns: 120px 1fr;
+  grid-template-columns: 1fr;
   opacity: 0.92;
+}
+
+.pack-card--secondary:has(.pack-card__cover) {
+  grid-template-columns: 120px 1fr;
 }
 
 .pack-card--secondary .pack-card__cover {

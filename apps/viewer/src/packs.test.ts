@@ -40,6 +40,7 @@ describe("viewer gallery pack registry", () => {
     expect(packs[0]?.href).toBe("/?scroll=qingming-riverside");
     expect(packs[1]?.secondary).toBe(true);
     expect(packs[1]?.featured).toBe(false);
+    expect(packs[1]?.coverUrl).toBeNull();
   });
 
   it("builds deep links and skips templates from a Vite-style glob", () => {
