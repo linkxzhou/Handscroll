@@ -117,12 +117,12 @@ const STORY_CSS = `
   pointer-events: none;
   z-index: 3;
   opacity: 0;
-  background: linear-gradient(180deg, rgba(48, 36, 26, 0.12), rgba(22, 16, 12, 0.88));
-  border-bottom: 2px solid rgba(90, 68, 48, 0.35);
+  background: linear-gradient(180deg, rgba(78, 58, 40, 0.05), rgba(48, 36, 26, 0.42));
+  mix-blend-mode: multiply;
   clip-path: polygon(0% 45%, 12% 12%, 50% 0%, 88% 12%, 100% 45%, 100% 100%, 0% 100%);
   transition: opacity 0.25s ease;
 }
-.qingming-bridge-occluder.is-active { opacity: 0.92; }
+.qingming-bridge-occluder.is-active { opacity: 0.72; }
 .qingming-rope-svg {
   position: absolute;
   inset: 0;
