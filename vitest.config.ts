@@ -7,6 +7,7 @@ export default defineConfig({
       "packages/**/*.test.ts",
       "tools/**/*.test.ts",
       "contents/**/*.test.ts",
+      "apps/**/*.test.ts",
     ],
     environment: "node",
     restoreMocks: true,

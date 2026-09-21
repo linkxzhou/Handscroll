@@ -8,3 +8,10 @@ coverage
 .turbo
 *.tsbuildinfo
 apps/*/public/contents
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

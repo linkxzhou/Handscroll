@@ -104,8 +104,8 @@ contents/<scroll-id>/
 |---|---|---|
 | 1. 生图 | 用任意大模型 / 绘画工具出长卷底图与分层素材 | **人工**（首版） |
 | 2. 投放 | 复制到 `contents/<id>/raw/`，更新 `meta.json` 尺寸与授权 | 人工 + 模板校验 |
-| 3. 切图 | `pnpm tile-builder --content <id>` | **自动** |
-| 4. 场景骨架 | `pnpm scene-scaffold --content <id>` 生成空 `scene.json` | **自动** |
+| 3. 切图 | `yarn content:tiles --id <id>` | **自动** |
+| 4. 场景骨架 | `yarn content:scaffold-scene --id <id>` 生成空 `scene.json` | **自动** |
 | 5. 渲染跑通 | viewer 只加载瓦片 + 默认视口（无剧情也可看图） | **自动** |
 | 6. 剧情脚本 | 在 `story/` 写业务：热点、时间线、过场 | **人工**（可 LLM 辅助写代码，但进业务目录） |
 | 7. 验证 | playground/viewer + Playwright 冒烟 + 真机 | 半自动 |
@@ -216,7 +216,7 @@ export function registerStory(engine: ScrollEngine) {
 | 项 | 选择 |
 |---|---|
 | 语言 | TypeScript（严格） |
-| 构建 | Vite + pnpm workspace |
+| 构建 | Vite + Yarn Berry 4 workspace（`nodeLinker: node-modules`） |
 | 主渲染 | PixiJS |
 | 三维 | Three.js，lazy 动态 import |
 | UI 壳 | Vue 或 React（viewer 外围） |
@@ -295,7 +295,7 @@ Handscroll/
 - README：人工放图工作流说明  
 - `tools/image-gen/README.md`：首版人工；未来 API 扩展点  
 
-**验收：** 目录约定文档化；`pnpm --filter playground dev` 可跑。
+**验收：** 目录约定文档化；`yarn playground` 可跑。
 
 ### Phase 1 — 放图即可看（技术门禁，约 1–1.5 周）
 

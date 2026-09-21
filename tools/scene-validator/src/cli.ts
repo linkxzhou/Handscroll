@@ -22,7 +22,7 @@ if (all) {
 } else if (id) {
   ids.push(id);
 } else {
-  console.error("Usage: pnpm content:validate -- --id demo-scroll   |   --all");
+  console.error("Usage: yarn content:validate --id demo-scroll   |   yarn content:validate:all");
   process.exit(1);
 }
 

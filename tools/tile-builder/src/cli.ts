@@ -13,7 +13,7 @@ function arg(name: string, fallback?: string): string | undefined {
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const id = arg("--content") ?? arg("--id");
 if (!id) {
-  console.error("Usage: pnpm content:tiles -- --id demo-scroll");
+  console.error("Usage: yarn content:tiles --id demo-scroll");
   process.exit(1);
 }
 

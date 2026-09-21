@@ -202,7 +202,7 @@ onSceneUnload / destroy content-local plugins
 {
   "scripts": {
     "test:plugins": "vitest run packages/plugins packages/core/src/PluginHost*",
-    "playground:plugins": "pnpm --filter playground dev -- --plugin-demo",
+    "playground:plugins": "yarn workspace @handscroll/playground dev --plugin-demo",
     "test:e2e:plugins": "playwright test e2e/plugins.spec.ts"
   }
 }

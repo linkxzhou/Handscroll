@@ -5,11 +5,12 @@ Handscroll content pack `qingming-riverside`. First real painting pack: stitch, 
 ## Open
 
 ```bash
-pnpm playground
-# http://localhost:5173/?scroll=qingming-riverside
+yarn viewer
+# gallery: http://localhost:5174/
+# this pack: http://localhost:5174/?scroll=qingming-riverside
 
-pnpm viewer
-# http://localhost:5174/?scroll=qingming-riverside
+yarn playground
+# engine HUD: http://localhost:5173/?scroll=qingming-riverside
 ```
 
 Drag to pan, wheel to zoom. Bottom dots fly to 水磨 / 茶市 / 虹桥 / 城门. Click a pin or hotspot for a short panel. Click 西岸/东岸码头 to run the ferry.
@@ -37,13 +38,13 @@ Left-bottom pills sit above **过船** (same HUD language as ferry/bridge):
 | **水面** | Toggles the `water` plugin. Primary path is a **lazy Three** translucent river plane (ADR 0002). If Three/WebGL is missing, a titled DOM shimmer band is the gated fallback. |
 | **音效** | Unmutes the `audio` plugin (`defaultMuted: true`). Rain/water cues are **procedural WebAudio noise**, not bundled mp3. |
 
-Switching to `demo-scroll` (viewer pack select) or unloading the scene disposes HUD, night wash, walkers, weather overlay, and water meshes — same hygiene as ferry/bridge.
+Leaving the pack (viewer **目录**, or loading `demo-scroll`) disposes HUD, night wash, walkers, weather overlay, and water meshes — same hygiene as ferry/bridge.
 
 If `tiles/` is missing locally:
 
 ```bash
-pnpm content:tiles -- --id qingming-riverside
-pnpm content:validate -- --id qingming-riverside
+yarn content:tiles --id qingming-riverside
+yarn content:validate --id qingming-riverside
 ```
 
 ## Attribution

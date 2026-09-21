@@ -13,7 +13,7 @@ function arg(name) {
 const id = arg("--id");
 const title = arg("--title") ?? id;
 if (!id || !/^[a-z0-9-]+$/.test(id)) {
-  console.error("Usage: pnpm content:new -- --id my-scroll --title \"My Scroll\"");
+  console.error("Usage: yarn content:new --id my-scroll --title \"My Scroll\"");
   process.exit(1);
 }
 
@@ -44,4 +44,4 @@ try {
   /* template may omit scene */
 }
 
-console.log(`Created contents/${id}. Place a long image at contents/${id}/raw/background.png then run pnpm content:tiles -- --id ${id}`);
+console.log(`Created contents/${id}. Place a long image at contents/${id}/raw/background.png then run yarn content:tiles --id ${id}`);

@@ -1,19 +1,21 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-Hans">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Handscroll viewer</title>
+    <title>手卷</title>
   </head>
   <body>
-    <header id="chrome">
-      <span class="brand">Handscroll</span>
-      <label>
-        scroll
-        <select id="scroll"></select>
-      </label>
-    </header>
-    <div id="app"></div>
+    <div id="home" hidden></div>
+    <div id="stage" hidden>
+      <header id="chrome">
+        <a id="home-link" href="/">目录</a>
+        <span class="brand">手卷</span>
+        <span id="pack-title"></span>
+        <span class="hint">拖移浏览 · 滚轮缩放</span>
+      </header>
+      <div id="app"></div>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
