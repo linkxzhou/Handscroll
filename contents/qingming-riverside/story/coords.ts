@@ -38,6 +38,32 @@ export const BOAT_SPRITE = {
   anchorY: 43 * 1.24,
 } as const;
 
+/**
+ * Upstream `bridge-event.js` vessel stations after +2172.
+ * Occluder is a DOM strip over the arch (faked occlusion — tiles stay a single layer).
+ */
+export const BRIDGE_PATH = {
+  approach: fromRef(1790, 662),
+  mastStart: fromRef(1635, 596),
+  mastEnd: fromRef(1530, 550),
+  underEnd: fromRef(1510, 485),
+} as const;
+
+export const BRIDGE_APEX = fromRef(1501.7, 402.4);
+
+export const BRIDGE_OCCLUDER = {
+  x: fromRef(1428, 360).x,
+  y: 360,
+  w: 1595 - 1428,
+  h: 90,
+} as const;
+
+export const BRIDGE_CARGO_SCALE = {
+  approach: 1.17,
+  mast: 1.05,
+  under: 0.42,
+} as const;
+
 /** Upstream `#district-stops` data-x values, remapped and vertically framed on the stitch. */
 export const CHAPTERS = {
   watermill: { centerX: fromRef(-1550, 0).x, centerY: 400, zoom: 1.15 },

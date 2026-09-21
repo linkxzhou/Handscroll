@@ -60,6 +60,16 @@
       "action": { "type": "openPanel", "payload": { "titleKey": "hotspot.bridge.title", "bodyKey": "hotspot.bridge.body" } }
     },
     {
+      "id": "bridge-event",
+      "type": "hotspot",
+      "x": 3660,
+      "y": 250,
+      "shape": { "kind": "rect", "w": 160, "h": 70 },
+      "interactionPriority": 4,
+      "i18nKey": "hotspot.bridgeEvent",
+      "action": { "type": "emit", "payload": { "event": "qingming:bridge" } }
+    },
+    {
       "id": "dock-east",
       "type": "hotspot",
       "x": 4140,

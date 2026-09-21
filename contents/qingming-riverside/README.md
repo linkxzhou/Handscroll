@@ -1,6 +1,6 @@
 # 沿河街市（清明上河图式）
 
-Handscroll content pack `qingming-riverside`. First real painting pack: stitch, chapters, hotspots, and a simplified ferry.
+Handscroll content pack `qingming-riverside`. First real painting pack: stitch, chapters, hotspots, a simplified ferry, and **虹桥过船**.
 
 ## Open
 
@@ -13,6 +13,18 @@ pnpm viewer
 ```
 
 Drag to pan, wheel to zoom. Bottom dots fly to 水磨 / 茶市 / 虹桥 / 城门. Click a pin or hotspot for a short panel. Click 西岸/东岸码头 to run the ferry.
+
+### 虹桥过船
+
+Start the simplified crossing (content-pack story, not core):
+
+1. Click the bottom-left **过船** button, or
+2. Click the **过船** pin / hotspot `bridge-event` on the Rainbow Bridge, or
+3. Open the **虹桥** panel and press **开始过船**
+
+The cargo boat (same `atlas/boat.webp` as the ferry) approaches from downstream, lowers its mast, then passes the arch. Hold **牵绳** (or Left Arrow / E) to help; spectating still completes the path. **Escape** cancels and removes overlays.
+
+**Faked occlusion:** Handscroll tiles are a single layer, so the hull is not clipped through the painted arch. While the boat is under the bridge, a DOM strip (`.qingming-bridge-occluder`) sits above the sprite. This is a stand-in for upstream Canvas2D arch masking — not 1:1 with `qingming-riverside` `bridge-art.js`.
 
 If `tiles/` is missing locally:
 
@@ -42,10 +54,15 @@ Reference-runtime coordinates map with `x' = x_ref + 2172`, `y' = y_ref` (`story
 | bridge | chapter | 3732 |
 | gate | chapter | 5532 |
 | dock-west / dock-east | ferry | 2802 / 4257 (berths) |
+| bridge-event | 过船 hotspot | 3660 |
 
-## Out of scope (this pack version)
+## Versus upstream `bridge-event`
 
-- Rainbow-bridge rope minigame
-- Weather / night / Three water
+Playable subset of the reference state machine (approach → mast/haul → under arch → done/cancel). Not ported: Canvas2D runtime, crowd reactions, painter “record” stills, drag-force crash-avoidance, or exact 90s+ timing.
+
+## Out of scope (Phase E / F, still deferred)
+
+- Weather / night / Three water (ADR)
 - Crowd / street-life port
+- Exact 1:1 parity with the upstream minigame feel
 - `third_party/` (gitignored; do not commit)

@@ -186,17 +186,18 @@ tools/qingming-adapt/
 
 ---
 
-### Phase D — 招牌事件「虹桥过船」（约 1–2 周）
+### Phase D — 招牌事件「虹桥过船」【本 pack 已落地简化版】
 
-- 移植参考 `bridge-event` **状态机语义**（接绳、降桅、过桥、旁观），UI 用 HTML overlay（viewer），渲染用 Pixi 精灵/简单绳索图形。  
-- 资产：复用 `boat.webp` + 桥区遮挡策略（前景 sprite 或遮罩层；复杂遮挡不够时降低表现，不改引擎拓扑）。  
+- 移植参考 `bridge-event` **状态机语义**（靠近、降桅/牵绳、过桥、完成/Esc 取消），UI 用 HTML overlay（viewer），船用现有 `boat.webp` DOM 精灵 + 简单绳索。  
+- **未**移植 Canvas2D 运行时。桥洞遮挡为 DOM 前景条带（假遮挡），不改引擎拓扑。  
+- 入口：左下「过船」按钮、热点 `bridge-event`、虹桥面板「开始过船」。  
 
 **验收**
 
 - 可完成一次「过船」主路径；Escape 可取消。  
-- 文档说明与参考差异（未 1:1 复刻处）。  
+- 文档说明与参考差异（未 1:1 复刻处）见 pack README。  
 
----
+**仍后置：** Phase E 时雨/夜景/水效；Phase F 人群街市。
 
 ### Phase E — 氛围插件对接（并行/后置）
 
@@ -346,7 +347,12 @@ pnpm test:content
 - [x] 人物/船 sprite 接入
 - [x] ferry 简化状态机 + 单测
 
-**D/E/F** 按优先级单独立项
+**D 虹桥过船（简化）**
+
+- [x] `story/events/bridge.ts` 状态机 + 单测 + `registerStory` 与 ferry 一同 dispose
+- [x] 热点 `bridge-event` / 过船按钮 / Esc 取消
+- [ ] Phase E 时雨/夜景/水效（仍后置）
+- [ ] Phase F 人群街市（仍后置）
 
 ---
 
