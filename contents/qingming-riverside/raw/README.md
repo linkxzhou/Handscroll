@@ -11,3 +11,6 @@ These are **original generated illustrations** for an interactive riverside scro
 
 ## License
 Confirm upstream repository license before public redistribution of binaries. Attribution required in `meta.json` / app about UI.
+
+## Seam note
+Stitch uses opaque panel paste + centered crossfade (no white canvas under alpha). Regenerate with `python3 tools/qingming-adapt/stitch-districts.py` then `pnpm content:tiles -- --id qingming-riverside`.
