@@ -4,7 +4,7 @@ import { formatViewportHud, isQuality, parseScrollId } from "./query.ts";
 describe("playground query helpers", () => {
   it("defaults the scroll id and reads ?scroll=", () => {
     expect(parseScrollId("")).toBe("demo-scroll");
-    expect(parseScrollId("?scroll=gusu-fanhua")).toBe("gusu-fanhua");
+    expect(parseScrollId("?scroll=guide-only-scroll")).toBe("guide-only-scroll");
     expect(parseScrollId("scroll=other&x=1")).toBe("other");
   });
 

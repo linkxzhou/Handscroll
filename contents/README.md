@@ -2,6 +2,15 @@
 
 Each painting is a folder under `contents/<scroll-id>/`. The engine never hard-codes a title.
 
+Bundled CI packs:
+
+| Pack | Role |
+|---|---|
+| `demo-scroll` | Tiles + guide + story (`gate-plaque` click → `camera.flyTo`) + a `model3d` primitive box |
+| `guide-only-scroll` | Different size; chapters + commentary hotspots; empty story; no Three |
+
+Preview: `?scroll=demo-scroll` or `?scroll=guide-only-scroll` on playground or viewer.
+
 ## New scroll
 
 ```bash
@@ -17,6 +26,6 @@ pnpm playground
 
 `raw/` is hand-placed only (v1 has no image-gen API). `tiles/` is tool output — do not edit by hand.
 
-Story code, if any, lives in `story/` and must export `registerStory`. This milestone still browses a pack with no story module.
+Story code lives in `story/index.ts` and must export `registerStory`. Return a cleanup function and/or listen for `scene:unload`. The viewer loads stories via Vite `import.meta.glob`, not by fetching `.ts` from `/contents`.
 
 See `plan/30-business-layer.md` for schemas and `plan/01-engine-implementation.md` for the workflow.

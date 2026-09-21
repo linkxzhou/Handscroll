@@ -7,9 +7,10 @@ import type { HitResult } from "./contracts/hit.ts";
 import type { SceneDocument } from "./contracts/engine.ts";
 
 function stubCtx(): EngineContext {
+  const events = new EventBus();
   return {
     engine: {
-      events: new EventBus(),
+      events,
       camera: {
         getState: () => ({ centerX: 0, centerY: 0, zoom: 1, screenWidth: 1, screenHeight: 1 }),
         flyTo: () => {},
@@ -30,6 +31,9 @@ function stubCtx(): EngineContext {
       getUiLayer: () => ({}) as HTMLElement,
       getDpr: () => 1,
       getScrollId: () => null,
+      getScene: () => null,
+      plugins: { use() {}, listIds: () => [] },
+      on: (event, handler) => events.on(event, handler),
     },
     scene: null,
     quality: "auto",

@@ -7,9 +7,14 @@ import { AnimationRuntime } from "@handscroll/animation";
 import { createPixiRenderer } from "@handscroll/renderer-pixi";
 import { createLazyThreeRenderer } from "@handscroll/renderer-three";
 import { builtinPlugins } from "@handscroll/plugins";
-import { createFetchResolver } from "@handscroll/scene";
+import {
+  BUNDLED_SCROLL_IDS,
+  createFetchResolver,
+  createGlobStoryLoader,
+  withStoryLoader,
+} from "@handscroll/scene";
 
-const KNOWN_SCROLLS = ["demo-scroll"];
+const storyModules = import.meta.glob("../../../contents/*/story/index.ts");
 
 const container = document.querySelector<HTMLElement>("#app");
 const select = document.querySelector<HTMLSelectElement>("#scroll");
@@ -18,7 +23,7 @@ if (!container || !select) throw new Error("viewer chrome missing");
 const params = new URLSearchParams(location.search);
 const initial = params.get("scroll") ?? "demo-scroll";
 
-for (const id of KNOWN_SCROLLS) {
+for (const id of BUNDLED_SCROLL_IDS) {
   const opt = document.createElement("option");
   opt.value = id;
   opt.textContent = id;
@@ -34,7 +39,10 @@ const engine = await ScrollEngine.create(
   {
     container,
     renderers: { pixi: true, three: "lazy" },
-    contentResolver: createFetchResolver({ baseUrl: "/contents" }),
+    contentResolver: withStoryLoader(
+      createFetchResolver({ baseUrl: "/contents" }),
+      createGlobStoryLoader(storyModules),
+    ),
     adapters: {
       createPixi: createPixiRenderer,
       createThree: createLazyThreeRenderer,

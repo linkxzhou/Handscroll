@@ -6,7 +6,9 @@ import { AnimationRuntime } from "@handscroll/animation";
 import { createPixiRenderer } from "@handscroll/renderer-pixi";
 import { createLazyThreeRenderer } from "@handscroll/renderer-three";
 import { builtinPlugins } from "@handscroll/plugins";
-import { createFetchResolver } from "@handscroll/scene";
+import { createFetchResolver, createGlobStoryLoader, withStoryLoader } from "@handscroll/scene";
+
+const storyModules = import.meta.glob("../../../contents/*/story/index.ts");
 
 export { isQuality, parseScrollId, formatViewportHud } from "./query.ts";
 
@@ -19,7 +21,10 @@ export async function bootHandscroll(container: HTMLElement, scrollId: string): 
       container,
       renderers: { pixi: true, three: "lazy" },
       quality: "auto",
-      contentResolver: createFetchResolver({ baseUrl: "/contents" }),
+      contentResolver: withStoryLoader(
+        createFetchResolver({ baseUrl: "/contents" }),
+        createGlobStoryLoader(storyModules),
+      ),
       adapters: {
         createPixi: createPixiRenderer,
         createThree: createLazyThreeRenderer,

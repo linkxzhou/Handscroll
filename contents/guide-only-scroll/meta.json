@@ -1,0 +1,23 @@
+{
+  "id": "guide-only-scroll",
+  "title": "Guide-only scroll",
+  "era": "synthetic",
+  "description": "Second content pack: different size, chapters, and commentary hotspots. Weak/empty story to prove pack isolation.",
+  "width": 3072,
+  "height": 768,
+  "defaultViewport": {
+    "centerX": 384,
+    "centerY": 384,
+    "zoom": 0.6
+  },
+  "plugins": ["guide"],
+  "pluginConfig": {
+    "guide": { "showChapterDots": true }
+  },
+  "storyEntry": "./story/index.ts",
+  "license": {
+    "code": "CC0-1.0",
+    "assets": "Procedurally generated geometric stand-in; not a historical painting.",
+    "notes": "Safe to ship in CI. Replace before any public art release."
+  }
+}

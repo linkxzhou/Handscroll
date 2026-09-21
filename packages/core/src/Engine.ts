@@ -17,6 +17,8 @@ import { ViewportController } from "./viewport/ViewportController.ts";
 import { InputManager } from "./input/InputManager.ts";
 import { RenderScheduler } from "./scheduler/RenderScheduler.ts";
 import type { HitResult } from "./contracts/hit.ts";
+import { applyHotspotAction } from "./hotspotAction.ts";
+import { sceneNeedsThree } from "./threeHint.ts";
 
 export type { EngineServices } from "./contracts/engine.ts";
 
@@ -102,17 +104,18 @@ export class ScrollEngine implements ScrollEnginePublic {
       this.camera.setCenter(scene.meta.width / 2, scene.meta.height / 2, this.camera.getState().zoom);
     }
 
-    const needsThree = scene.entities.some((e) => e.type === "model3d");
+    const needsThree = sceneNeedsThree(scene, meta.plugins ?? []);
     if (needsThree && this.three?.ensureLoaded) {
       await this.three.ensureLoaded();
     }
+    this.pixi?.setSceneEntities?.(scene.entities);
+    this.three?.setSceneEntities?.(scene.entities);
 
     const storyEntry = meta.storyEntry ?? "./story/index.ts";
-    if (this.options.contentResolver.loadStory) {
-      const story = await this.options.contentResolver.loadStory(scrollId, storyEntry);
-      if (story?.registerStory) {
-        await story.registerStory(this);
-      }
+    const story = await this.options.contentResolver.loadStory?.(scrollId, storyEntry);
+    if (story?.registerStory) {
+      const cleanup = await story.registerStory(this);
+      this.storyCleanup = typeof cleanup === "function" ? cleanup : null;
     }
 
     await this.plugins.broadcastSceneLoad(scene);
@@ -264,6 +267,18 @@ export class ScrollEngine implements ScrollEnginePublic {
     };
     if (this.plugins.dispatchHit(hit)) return;
     this.events.emit("entity:click", hit);
+    const entity = this.scene?.entities.find((item) => item.id === top.entityId);
+    if (entity) {
+      applyHotspotAction(
+        entity,
+        (event, payload) => this.events.emit(event, payload),
+        (opts) => {
+          this.camera.flyTo(opts);
+          this.scheduler.requestContinuous("camera");
+          this.scheduler.requestFrame();
+        },
+      );
+    }
   }
 
   private resizeToContainer(): void {
@@ -291,9 +306,17 @@ export class ScrollEngine implements ScrollEnginePublic {
   }
 
   private async unloadCurrent(): Promise<void> {
+    const hadContent = this.scrollId !== null || this.scene !== null || this.storyCleanup !== null;
+    if (hadContent) {
+      this.events.emit("scene:unload");
+    }
     this.storyCleanup?.();
     this.storyCleanup = null;
     await this.plugins.broadcastSceneUnload();
+    this.pixi?.setSceneEntities?.([]);
+    this.three?.setSceneEntities?.([]);
+    this.camera.interruptTransition();
+    this.scheduler.releaseContinuous("camera");
     this.services.tiles.clear();
     this.services.animation.clear();
     this.services.interaction.setEntities([]);
@@ -301,7 +324,6 @@ export class ScrollEngine implements ScrollEnginePublic {
     this.scene = null;
     this.meta = null;
     this.scrollId = null;
-    this.events.emit("scene:unload");
   }
 
   private assertAlive(): void {

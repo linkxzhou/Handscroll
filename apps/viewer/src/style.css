@@ -88,3 +88,41 @@ html, body {
   font: inherit;
   font-size: 13px;
 }
+
+.story-panel {
+  position: absolute;
+  top: 64px;
+  right: 16px;
+  width: min(320px, calc(100% - 32px));
+  pointer-events: auto;
+  background: rgba(18, 14, 11, 0.9);
+  border: 1px solid rgba(243, 230, 210, 0.22);
+  border-radius: 10px;
+  padding: 14px 16px 16px;
+}
+
+.story-panel[hidden] {
+  display: none;
+}
+
+.story-panel__close {
+  float: right;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.story-panel__title {
+  margin: 0 28px 8px 0;
+  font-size: 16px;
+}
+
+.story-panel__body {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  opacity: 0.9;
+}

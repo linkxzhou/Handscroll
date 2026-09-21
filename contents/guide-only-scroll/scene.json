@@ -1,0 +1,66 @@
+{
+  "version": 1,
+  "meta": {
+    "id": "guide-only-scroll",
+    "width": 3072,
+    "height": 768
+  },
+  "background": {
+    "manifestUrl": "./tiles/manifest.json"
+  },
+  "entities": [
+    {
+      "id": "grove-note",
+      "type": "hotspot",
+      "x": 180,
+      "y": 120,
+      "shape": { "kind": "rect", "w": 280, "h": 160 },
+      "interactionPriority": 1,
+      "action": {
+        "type": "openPanel",
+        "payload": {
+          "title": "West grove",
+          "body": "Commentary-only hotspot. This pack has no flyTo story — only the guide rail and this panel."
+        }
+      }
+    },
+    {
+      "id": "terrace-note",
+      "type": "hotspot",
+      "x": 2520,
+      "y": 200,
+      "shape": { "kind": "rect", "w": 300, "h": 180 },
+      "interactionPriority": 1,
+      "action": {
+        "type": "openPanel",
+        "payload": {
+          "title": "East terrace",
+          "body": "A second commentary stop. Switching away from this pack must drop these listeners and tiles."
+        }
+      }
+    }
+  ],
+  "chapters": [
+    {
+      "id": "west",
+      "title": "West grove",
+      "centerX": 320,
+      "centerY": 384,
+      "zoom": 0.85
+    },
+    {
+      "id": "canal",
+      "title": "Canal path",
+      "centerX": 1536,
+      "centerY": 384,
+      "zoom": 0.75
+    },
+    {
+      "id": "east",
+      "title": "East terrace",
+      "centerX": 2750,
+      "centerY": 384,
+      "zoom": 0.85
+    }
+  ]
+}

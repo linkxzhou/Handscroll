@@ -72,4 +72,10 @@ describe("scene-validator cross checks B-U-03/04", () => {
     const result = await validateContentPack(demo);
     expect(result.ok, result.issues.map((i) => `${i.path}: ${i.message}`).join("; ")).toBe(true);
   });
+
+  it("accepts the committed guide-only-scroll pack", async () => {
+    const pack = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../contents/guide-only-scroll");
+    const result = await validateContentPack(pack);
+    expect(result.ok, result.issues.map((i) => `${i.path}: ${i.message}`).join("; ")).toBe(true);
+  });
 });

@@ -23,3 +23,8 @@ export interface ScrollPlugin {
 }
 
 export type PluginFactory = (config: unknown) => ScrollPlugin;
+
+export interface PluginHostLike {
+  use(plugin: ScrollPlugin): void;
+  listIds(): string[];
+}

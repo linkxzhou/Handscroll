@@ -1,5 +1,5 @@
 import type { SceneMeta, ViewportState, FlyToOptions } from "./viewport.ts";
-import type { PluginFactory } from "./plugin.ts";
+import type { PluginFactory, PluginHostLike } from "./plugin.ts";
 import type { HitResult } from "./hit.ts";
 
 export type QualityLevel = "auto" | "low" | "medium" | "high";
@@ -103,8 +103,12 @@ export interface SceneDocument {
   chapters: ChapterBookmark[];
 }
 
+export type StoryCleanup = () => void;
+
 export interface StoryModule {
-  registerStory?(engine: unknown): void | Promise<void>;
+  registerStory?(
+    engine: ScrollEnginePublic,
+  ): void | StoryCleanup | Promise<void | StoryCleanup>;
 }
 
 export interface VisibleTile {
@@ -128,6 +132,7 @@ export interface RendererAdapter {
   setSize(width: number, height: number, dpr: number): void;
   sync(viewport: ViewportState): void;
   setTiles?(tiles: readonly VisibleTile[]): void;
+  setSceneEntities?(entities: readonly SceneEntity[]): void;
   needsThree?(): boolean;
   ensureLoaded?(): Promise<void>;
   render(): void;
@@ -169,6 +174,8 @@ export interface ScrollEnginePublic {
   readonly events: EventBusLike;
   readonly camera: ViewportControllerLike;
   readonly scheduler: SchedulerLike;
+  readonly plugins: PluginHostLike;
+  on(event: string, handler: (...args: unknown[]) => void): () => void;
   getViewport(): ViewportState;
   setQuality(q: QualityLevel): void;
   getQuality(): QualityLevel;
@@ -178,6 +185,7 @@ export interface ScrollEnginePublic {
   getUiLayer(): HTMLElement;
   getDpr(): number;
   getScrollId(): string | null;
+  getScene(): SceneDocument | null;
 }
 
 export interface TileSystem {

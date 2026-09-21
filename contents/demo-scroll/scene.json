@@ -16,7 +16,21 @@
       "y": 200,
       "shape": { "kind": "rect", "w": 360, "h": 220 },
       "interactionPriority": 1,
-      "action": { "type": "openPanel", "payload": { "title": "City gate" } }
+      "action": {
+        "type": "openPanel",
+        "payload": {
+          "title": "City gate",
+          "body": "A synthetic plaque hotspot. The demo story flies the camera here; the guide plugin shows this panel."
+        }
+      }
+    },
+    {
+      "id": "anchor-box",
+      "type": "model3d",
+      "x": 2304,
+      "y": 512,
+      "url": "primitive:box",
+      "zIndex": 5
     }
   ],
   "chapters": [

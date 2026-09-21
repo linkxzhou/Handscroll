@@ -11,14 +11,18 @@ export type {
   SceneDocument,
   SceneEntity,
   HotspotEntity,
+  Model3dEntity,
   VisibleTile,
   RendererAdapter,
   RendererFactories,
   ScrollEnginePublic,
   StoryModule,
+  StoryCleanup,
 } from "./contracts/engine.ts";
 export { DEFAULT_CACHE_POLICY } from "./contracts/engine.ts";
-export type { ScrollPlugin, EngineContext, PluginFactory } from "./contracts/plugin.ts";
+export type { ScrollPlugin, EngineContext, PluginFactory, PluginHostLike } from "./contracts/plugin.ts";
+export { applyHotspotAction } from "./hotspotAction.ts";
+export type { PanelOpenPayload } from "./hotspotAction.ts";
 
 export { ScrollEngine } from "./Engine.ts";
 export type { EngineServices } from "./contracts/engine.ts";
@@ -29,3 +33,4 @@ export { InputManager } from "./input/InputManager.ts";
 export { GestureState, DRAG_THRESHOLD_PX } from "./input/GestureState.ts";
 export { isUiPointerTarget, UI_POINTER_SELECTOR } from "./input/uiTarget.ts";
 export { RenderScheduler } from "./scheduler/RenderScheduler.ts";
+export { sceneNeedsThree, THREE_PLUGIN_IDS } from "./threeHint.ts";

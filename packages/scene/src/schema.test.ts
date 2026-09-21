@@ -61,10 +61,11 @@ describe("schemas B-U-01/02", () => {
           action: { type: "openPanel", payload: { title: "Gate" } },
         },
         { id: "boat", type: "sprite", x: 1, y: 2, url: "boat.png" },
+        { id: "anchor-box", type: "model3d", x: 40, y: 20, url: "primitive:box" },
       ],
       chapters: [{ id: "start", title: "Start", centerX: 50, centerY: 25, zoom: 0.5 }],
     });
-    expect(scene.entities).toHaveLength(2);
+    expect(scene.entities).toHaveLength(3);
     expect(scene.chapters[0]?.id).toBe("start");
   });
 
