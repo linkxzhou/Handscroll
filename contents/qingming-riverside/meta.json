@@ -1,0 +1,24 @@
+{
+  "id": "qingming-riverside",
+  "title": "沿河街市（清明上河图式）",
+  "era": "宋风原创再创作",
+  "description": "Browse a stitched riverside street derived from xianxie6/qingming-riverside. Original generated illustration, not a scan of Zhang Zeduan’s Qingming Festival painting.",
+  "width": 6516,
+  "height": 724,
+  "defaultViewport": {
+    "centerX": 3258,
+    "centerY": 362,
+    "zoom": 0.9
+  },
+  "plugins": ["quality", "guide", "audio"],
+  "pluginConfig": {
+    "quality": { "default": "auto" },
+    "guide": { "showChapterDots": true },
+    "audio": { "defaultMuted": true }
+  },
+  "storyEntry": "./story/index.ts",
+  "license": {
+    "assets": "Derived from xianxie6/qingming-riverside original generated art; not Song-dynasty original painting scans. See raw/README.md.",
+    "notes": "Verify upstream license before public redistribution of binaries."
+  }
+}

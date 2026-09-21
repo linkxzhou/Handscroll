@@ -19,4 +19,9 @@ pnpm playground
 
 Story code, if any, lives in `story/` and must export `registerStory`. This milestone still browses a pack with no story module.
 
+Shipped packs:
+
+- `demo-scroll` — synthetic engine-acceptance painting
+- `qingming-riverside` — stitched riverside street; `pnpm playground` → `?scroll=qingming-riverside`
+
 See `plan/30-business-layer.md` for schemas and `plan/01-engine-implementation.md` for the workflow.

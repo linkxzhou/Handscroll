@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "meta": {
+    "id": "qingming-riverside",
+    "width": 6516,
+    "height": 724
+  },
+  "background": {
+    "manifestUrl": "./tiles/manifest.json"
+  },
+  "entities": [
+    {
+      "id": "ferry-boat",
+      "type": "sprite",
+      "x": 4257,
+      "y": 556,
+      "zIndex": 20,
+      "url": "./atlas/boat.webp",
+      "width": 213,
+      "height": 64
+    },
+    {
+      "id": "hotspot-watermill",
+      "type": "hotspot",
+      "x": 400,
+      "y": 180,
+      "shape": { "kind": "rect", "w": 280, "h": 340 },
+      "interactionPriority": 1,
+      "i18nKey": "hotspot.watermill",
+      "action": { "type": "openPanel", "payload": { "titleKey": "hotspot.watermill.title", "bodyKey": "hotspot.watermill.body" } }
+    },
+    {
+      "id": "hotspot-teahouse",
+      "type": "hotspot",
+      "x": 2848,
+      "y": 444,
+      "shape": { "kind": "rect", "w": 105, "h": 98 },
+      "interactionPriority": 2,
+      "i18nKey": "hotspot.teahouse",
+      "action": { "type": "openPanel", "payload": { "titleKey": "hotspot.teahouse.title", "bodyKey": "hotspot.teahouse.body" } }
+    },
+    {
+      "id": "dock-west",
+      "type": "hotspot",
+      "x": 2752,
+      "y": 506,
+      "shape": { "kind": "rect", "w": 120, "h": 130 },
+      "interactionPriority": 3,
+      "i18nKey": "hotspot.dockWest",
+      "action": { "type": "openPanel", "payload": { "titleKey": "hotspot.dockWest.title", "bodyKey": "hotspot.dockWest.body" } }
+    },
+    {
+      "id": "hotspot-bridge",
+      "type": "hotspot",
+      "x": 3520,
+      "y": 330,
+      "shape": { "kind": "rect", "w": 280, "h": 160 },
+      "interactionPriority": 2,
+      "i18nKey": "hotspot.bridge",
+      "action": { "type": "openPanel", "payload": { "titleKey": "hotspot.bridge.title", "bodyKey": "hotspot.bridge.body" } }
+    },
+    {
+      "id": "dock-east",
+      "type": "hotspot",
+      "x": 4140,
+      "y": 480,
+      "shape": { "kind": "rect", "w": 160, "h": 150 },
+      "interactionPriority": 3,
+      "i18nKey": "hotspot.dockEast",
+      "action": { "type": "openPanel", "payload": { "titleKey": "hotspot.dockEast.title", "bodyKey": "hotspot.dockEast.body" } }
+    },
+    {
+      "id": "hotspot-gate",
+      "type": "hotspot",
+      "x": 5380,
+      "y": 70,
+      "shape": { "kind": "rect", "w": 400, "h": 450 },
+      "interactionPriority": 1,
+      "i18nKey": "hotspot.gate",
+      "action": { "type": "openPanel", "payload": { "titleKey": "hotspot.gate.title", "bodyKey": "hotspot.gate.body" } }
+    }
+  ],
+  "chapters": [
+    {
+      "id": "watermill",
+      "title": "水磨",
+      "titleKey": "chapter.watermill",
+      "centerX": 622,
+      "centerY": 400,
+      "zoom": 1.15
+    },
+    {
+      "id": "teahouse",
+      "title": "茶市",
+      "titleKey": "chapter.teahouse",
+      "centerX": 2822,
+      "centerY": 400,
+      "zoom": 1.2
+    },
+    {
+      "id": "bridge",
+      "title": "虹桥",
+      "titleKey": "chapter.bridge",
+      "centerX": 3732,
+      "centerY": 400,
+      "zoom": 1.25
+    },
+    {
+      "id": "gate",
+      "title": "城门",
+      "titleKey": "chapter.gate",
+      "centerX": 5532,
+      "centerY": 400,
+      "zoom": 1.1
+    }
+  ]
+}

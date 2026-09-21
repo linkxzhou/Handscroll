@@ -7,7 +7,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "typecheck": "pnpm -r --if-present typecheck",
+    "typecheck": "pnpm -r --if-present typecheck && tsc --noEmit -p tsconfig.json",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "test:dep": "node tools/check-deps.mjs",

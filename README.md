@@ -22,9 +22,16 @@ pnpm test:dep          # core must not import pixi.js / three
 
 pnpm playground        # http://localhost:5173/?scroll=demo-scroll
 pnpm viewer            # http://localhost:5174/?scroll=demo-scroll
+
+# first real content pack (stitched riverside)
+pnpm content:tiles -- --id qingming-riverside   # if tiles/ is missing
+pnpm content:validate -- --id qingming-riverside
+# http://localhost:5173/?scroll=qingming-riverside
 ```
 
 Drag to pan, wheel to zoom. No story script is required to browse tiles.
+
+`qingming-riverside` is an **original generated** street scroll derived from [xianxie6/qingming-riverside](https://github.com/xianxie6/qingming-riverside). It is **not** a scan of Zhang Zeduan’s Song-dynasty *Along the River During the Qingming Festival*. See `contents/qingming-riverside/README.md`.
 
 ## New content pack
 
@@ -53,6 +60,7 @@ tools/tile-builder       sharp CLI
 tools/scene-validator    Zod + cross checks
 contents/_template
 contents/demo-scroll
+contents/qingming-riverside   # riverside street pack (tiles + story)
 ```
 
 Plans in `plan/` are the source of truth. This milestone is Phase 0 + engine E0–E2: you can put an image in `raw/`, tile it, and pan/zoom in the playground.

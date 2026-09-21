@@ -7,7 +7,7 @@ These are **original generated illustrations** for an interactive riverside scro
 
 ## Files
 - `background.webp` — offline stitch of `district-west` + `street-empty` + `district-east` at 6516×724 (each panel 2172×724). Engine world coords use this plate; reference-code coordinates map via `x' = x_ref + 2172`.
-- `overlays/boat.webp` — boat sprite from upstream assets.
+- `overlays/boat.webp` — upstream boat plate (2172×724, mostly transparent). Story uses a crop at `atlas/boat.webp` (40,150,2100,425) scaled to ~213×64 world units.
 
 ## License
 Confirm upstream repository license before public redistribution of binaries. Attribution required in `meta.json` / app about UI.
