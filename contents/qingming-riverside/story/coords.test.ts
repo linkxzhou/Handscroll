@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   BERTHS,
+  BRIDGE_APEX,
+  BRIDGE_OCCLUDER,
+  BRIDGE_PATH,
   CHAPTERS,
   REF_SHIFT_X,
   WORLD_HEIGHT,
@@ -27,6 +30,12 @@ describe("qingming coords Q-A-03", () => {
       fromRef(3360, 400),
       fromRef(630, 556),
       fromRef(2085, 556),
+      BRIDGE_PATH.approach,
+      BRIDGE_PATH.mastStart,
+      BRIDGE_PATH.mastEnd,
+      BRIDGE_PATH.underEnd,
+      BRIDGE_APEX,
+      { x: BRIDGE_OCCLUDER.x, y: BRIDGE_OCCLUDER.y },
     ];
     for (const p of samples) {
       expect(inWorld(p.x, p.y)).toBe(true);

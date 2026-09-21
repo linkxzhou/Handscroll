@@ -8,12 +8,21 @@
   "hotspot.teahouse.title": "沿河茶铺",
   "hotspot.teahouse.body": "中央偏左的二层茶楼。食客临河而坐，店家往来斟茶。点击西岸码头可唤渡船。",
   "hotspot.bridge.title": "虹桥",
-  "hotspot.bridge.body": "中央木构拱桥。桥下行船，桥上行人。完整「虹桥过船」接绳玩法将在后续版本接入。",
+  "hotspot.bridge.body": "中央木构拱桥。点击左下角「过船」或桥上「过船」热点开始虹桥过船：货船靠近、降桅、穿过桥洞。可按住牵绳协助，Esc 取消。",
+  "hotspot.bridgeEvent.title": "过船",
+  "hotspot.bridgeEvent.body": "开始虹桥过船。货船靠近后降桅穿过桥洞；按住牵绳可加快，Esc 取消。",
   "hotspot.gate.title": "城门货市",
   "hotspot.gate.body": "东段城门与仓场。券门内是街巷，门外堆放竹木与货包。",
   "hotspot.dockWest.title": "西岸码头",
   "hotspot.dockWest.body": "茶楼前的西岸泊位。点击码头召唤渡船：若船已在此岸，则驶向对岸；否则驶来此岸。",
   "hotspot.dockEast.title": "东岸码头",
   "hotspot.dockEast.body": "虹桥以东的石阶码头。点击召唤渡船，作一次简化横渡。",
-  "ferry.summoned": "渡船应召"
+  "ferry.summoned": "渡船应召",
+  "bridge.startPanel": "开始过船",
+  "bridge.start": "过船",
+  "bridge.haul": "牵绳",
+  "bridge.approaching": "货船正在靠近虹桥",
+  "bridge.mast": "船工正在降桅。按住牵绳协助，或旁观等待。",
+  "bridge.under": "船正在过桥。继续牵绳或旁观。",
+  "bridge.done": "船已通过虹桥。"
 }

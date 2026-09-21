@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { MetaSchema, SceneSchema } from "@handscroll/scene";
-import { validateContentPack } from "../../../tools/scene-validator/src/validate.ts";
+import { validateContentPack } from "../../tools/scene-validator/src/validate.ts";
 import { CHAPTERS, inWorld } from "./story/coords.ts";
 
 const packDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
@@ -21,6 +21,7 @@ describe("qingming-riverside pack load Q-A-02", () => {
     expect(meta.plugins).toEqual(["quality", "guide", "audio"]);
     expect(scene.chapters.map((c) => c.id)).toEqual(["watermill", "teahouse", "bridge", "gate"]);
     expect(scene.entities.some((e) => e.id === "ferry-boat" && e.type === "sprite")).toBe(true);
+    expect(scene.entities.some((e) => e.id === "bridge-event" && e.type === "hotspot")).toBe(true);
     expect(scene.entities.filter((e) => e.id.startsWith("dock-")).map((e) => e.id).sort()).toEqual(["dock-east", "dock-west"]);
   });
 

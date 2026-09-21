@@ -16,6 +16,7 @@ export type {
   RendererFactories,
   ScrollEnginePublic,
   StoryModule,
+  SchedulerLike,
 } from "./contracts/engine.ts";
 export { DEFAULT_CACHE_POLICY } from "./contracts/engine.ts";
 export type { ScrollPlugin, EngineContext, PluginFactory } from "./contracts/plugin.ts";

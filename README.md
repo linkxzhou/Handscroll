@@ -33,6 +33,8 @@ Drag to pan, wheel to zoom. No story script is required to browse tiles.
 
 `qingming-riverside` is an **original generated** street scroll derived from [xianxie6/qingming-riverside](https://github.com/xianxie6/qingming-riverside). It is **not** a scan of Zhang Zeduan’s Song-dynasty *Along the River During the Qingming Festival*. See `contents/qingming-riverside/README.md`.
 
+In that pack: click docks for the ferry; **过船** (bottom-left, or the pin on 虹桥) starts the Rainbow Bridge crossing. Escape cancels. Weather/night/crowds are still deferred.
+
 ## New content pack
 
 ```bash

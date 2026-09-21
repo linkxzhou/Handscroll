@@ -3,6 +3,7 @@ import type { ScrollEnginePublic } from "@handscroll/core";
 import { EventBus } from "@handscroll/core";
 import { registerStory } from "./index.ts";
 import { FERRY_CONTINUOUS_REASON } from "./events/ferry.ts";
+import { BRIDGE_CONTINUOUS_REASON } from "./events/bridge.ts";
 
 function mockEngine(): ScrollEnginePublic & { continuous: Set<string> } {
   const events = new EventBus();
@@ -53,6 +54,31 @@ describe("qingming registerStory pack load", () => {
     engine.continuous.clear();
     engine.events.emit("entity:click", { entityId: "dock-west", renderer: "pixi", interactionPriority: 1, worldX: 0, worldY: 0 });
     expect(engine.continuous.has(FERRY_CONTINUOUS_REASON)).toBe(false);
+    expect(() => cleanup()).not.toThrow();
+  });
+
+  it("starts 虹桥过船 from the bridge-event hotspot and disposes with ferry", () => {
+    const engine = mockEngine();
+    const cleanup = registerStory(engine);
+    engine.events.emit("entity:click", {
+      entityId: "bridge-event",
+      renderer: "pixi",
+      interactionPriority: 1,
+      worldX: 0,
+      worldY: 0,
+    });
+    expect(engine.continuous.has(BRIDGE_CONTINUOUS_REASON)).toBe(true);
+    cleanup();
+    expect(engine.continuous.has(BRIDGE_CONTINUOUS_REASON)).toBe(false);
+    expect(engine.continuous.has(FERRY_CONTINUOUS_REASON)).toBe(false);
+    engine.events.emit("entity:click", {
+      entityId: "bridge-event",
+      renderer: "pixi",
+      interactionPriority: 1,
+      worldX: 0,
+      worldY: 0,
+    });
+    expect(engine.continuous.has(BRIDGE_CONTINUOUS_REASON)).toBe(false);
     expect(() => cleanup()).not.toThrow();
   });
 });
