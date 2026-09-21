@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "meta": {
+    "id": "untitled-scroll",
+    "width": 4096,
+    "height": 1024
+  },
+  "background": {
+    "manifestUrl": "./tiles/manifest.json"
+  },
+  "entities": [],
+  "chapters": []
+}

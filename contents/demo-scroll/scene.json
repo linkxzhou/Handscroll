@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "meta": {
+    "id": "demo-scroll",
+    "width": 4096,
+    "height": 1024
+  },
+  "background": {
+    "manifestUrl": "./tiles/manifest.json"
+  },
+  "entities": [
+    {
+      "id": "gate-plaque",
+      "type": "hotspot",
+      "x": 1580,
+      "y": 200,
+      "shape": { "kind": "rect", "w": 360, "h": 220 },
+      "interactionPriority": 1,
+      "action": { "type": "openPanel", "payload": { "title": "City gate" } }
+    }
+  ],
+  "chapters": [
+    {
+      "id": "dawn",
+      "title": "Dawn market",
+      "centerX": 256,
+      "centerY": 512,
+      "zoom": 0.7
+    },
+    {
+      "id": "bridge",
+      "title": "Bridge",
+      "centerX": 2304,
+      "centerY": 512,
+      "zoom": 0.8
+    },
+    {
+      "id": "dusk",
+      "title": "River dusk",
+      "centerX": 3840,
+      "centerY": 512,
+      "zoom": 0.7
+    }
+  ]
+}

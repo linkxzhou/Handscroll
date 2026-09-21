@@ -1,0 +1,24 @@
+{
+  "id": "demo-scroll",
+  "title": "Demo scroll",
+  "era": "synthetic",
+  "description": "Engine acceptance pack: a synthetic long painting used to verify tiles, viewport, and plugins. No historical story.",
+  "width": 4096,
+  "height": 1024,
+  "defaultViewport": {
+    "centerX": 512,
+    "centerY": 512,
+    "zoom": 0.55
+  },
+  "plugins": ["quality", "guide"],
+  "pluginConfig": {
+    "quality": { "default": "auto" },
+    "guide": { "showChapterDots": true }
+  },
+  "storyEntry": "./story/index.ts",
+  "license": {
+    "code": "CC0-1.0",
+    "assets": "Procedurally generated geometric stand-in; not a historical painting.",
+    "notes": "Safe to ship in CI. Replace before any public 'art' release."
+  }
+}

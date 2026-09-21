@@ -1,0 +1,27 @@
+{
+  "name": "@handscroll/playground",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 5173",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@handscroll/animation": "workspace:*",
+    "@handscroll/assets": "workspace:*",
+    "@handscroll/core": "workspace:*",
+    "@handscroll/interaction": "workspace:*",
+    "@handscroll/plugins": "workspace:*",
+    "@handscroll/renderer-pixi": "workspace:*",
+    "@handscroll/renderer-three": "workspace:*",
+    "@handscroll/scene": "workspace:*",
+    "@handscroll/tiles": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^6.2.2",
+    "typescript": "^5.8.2"
+  }
+}

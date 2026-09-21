@@ -1,0 +1,22 @@
+{
+  "id": "untitled-scroll",
+  "title": "Untitled scroll",
+  "description": "Copy this folder to contents/<scroll-id>/ and replace this file.",
+  "width": 4096,
+  "height": 1024,
+  "defaultViewport": {
+    "centerX": 2048,
+    "centerY": 512,
+    "zoom": 0.4
+  },
+  "plugins": ["quality"],
+  "pluginConfig": {
+    "quality": { "default": "auto" }
+  },
+  "storyEntry": "./story/index.ts",
+  "license": {
+    "code": "UNLICENSED",
+    "assets": "Replace with source and license before publishing.",
+    "notes": "v1: place artwork manually in raw/."
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "name": "handscroll",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.3",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test:dep": "node tools/check-deps.mjs",
+    "test:engine": "vitest run packages/core packages/tiles packages/assets packages/interaction",
+    "test:plugins": "vitest run packages/plugins packages/core",
+    "test:content": "vitest run packages/scene tools/scene-validator",
+    "playground": "pnpm --filter @handscroll/playground dev",
+    "viewer": "pnpm --filter @handscroll/viewer dev",
+    "content:new": "node tools/content-new.mjs",
+    "content:tiles": "pnpm --filter @handscroll/tile-builder start",
+    "content:scaffold-scene": "pnpm --filter @handscroll/scene-scaffold start",
+    "content:validate": "pnpm --filter @handscroll/scene-validator start",
+    "content:validate:all": "pnpm --filter @handscroll/scene-validator start -- --all",
+    "content:preview": "pnpm --filter @handscroll/viewer dev",
+    "content:generate-demo": "pnpm --filter @handscroll/tile-builder generate-demo"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.8",
+    "tsx": "^4.19.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "sharp"]
+  }
+}

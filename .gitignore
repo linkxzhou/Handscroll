@@ -1,1 +1,10 @@
 third_party
+node_modules
+dist
+.vite
+coverage
+*.log
+.DS_Store
+.turbo
+*.tsbuildinfo
+apps/*/public/contents
