@@ -38,6 +38,8 @@ export class InputManager {
 
     this.onPointerDown = (ev) => {
       if (ev.button !== 0 && ev.pointerType === "mouse") return;
+      const target = ev.target as HTMLElement | null;
+      if (target?.closest("button, a, input, select, textarea, label, .guide-rail")) return;
       this.camera.interruptTransition();
       this.scheduler.releaseContinuous("camera");
       this.target.setPointerCapture(ev.pointerId);
