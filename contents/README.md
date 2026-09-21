@@ -5,14 +5,14 @@ Each painting is a folder under `contents/<scroll-id>/`. The engine never hard-c
 ## New scroll
 
 ```bash
-pnpm content:new -- --id my-scroll --title "My Scroll"
+yarn content:new --id my-scroll --title "My Scroll"
 # put a long image at contents/my-scroll/raw/background.png
 # document source in contents/my-scroll/raw/README.md
-pnpm content:tiles -- --id my-scroll
-pnpm content:scaffold-scene -- --id my-scroll   # if you need a fresh scene.json
-pnpm content:validate -- --id my-scroll
-pnpm playground
-# open ?scroll=my-scroll
+yarn content:tiles --id my-scroll
+yarn content:scaffold-scene --id my-scroll   # if you need a fresh scene.json
+yarn content:validate --id my-scroll
+yarn viewer
+# gallery lists the pack; open ?scroll=my-scroll
 ```
 
 `raw/` is hand-placed only (v1 has no image-gen API). `tiles/` is tool output — do not edit by hand.
@@ -21,7 +21,7 @@ Story code, if any, lives in `story/` and must export `registerStory`. This mile
 
 Shipped packs:
 
-- `demo-scroll` — synthetic engine-acceptance painting
-- `qingming-riverside` — stitched riverside street with ferry, 虹桥过船, 时雨/夜景/水面, and a modest street-life overlay; `pnpm playground` → `?scroll=qingming-riverside`
+- `qingming-riverside` — stitched riverside street with ferry, 虹桥过船, 时雨/夜景/水面, and a modest street-life overlay; `yarn viewer` → `/?scroll=qingming-riverside`
+- `demo-scroll` — synthetic engine-acceptance painting (tech demo card on the gallery)
 
 See `plan/30-business-layer.md` for schemas and `plan/01-engine-implementation.md` for the workflow.

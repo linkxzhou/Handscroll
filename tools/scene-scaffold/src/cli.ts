@@ -7,7 +7,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../
 const idx = process.argv.findIndex((a) => a === "--content" || a === "--id");
 const id = idx >= 0 ? process.argv[idx + 1] : undefined;
 if (!id) {
-  console.error("Usage: pnpm content:scaffold-scene -- --id demo-scroll");
+  console.error("Usage: yarn content:scaffold-scene --id demo-scroll");
   process.exit(1);
 }
 

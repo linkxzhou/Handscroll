@@ -158,22 +158,22 @@ export async function registerStory(engine: ScrollEngine): Promise<void> {
 
 ```bash
 # 1) 从模板新建
-pnpm content:new --id gusu-fanhua --title "姑苏繁华图（示例）"
+yarn content:new --id gusu-fanhua --title "姑苏繁华图（示例）"
 
 # 2) 人工：把长图放入 contents/gusu-fanhua/raw/，写 raw/README.md 授权
 
 # 3) 切图
-pnpm content:tiles --id gusu-fanhua
+yarn content:tiles --id gusu-fanhua
 
 # 4) 生成空 scene（若尚无）
-pnpm content:scaffold-scene --id gusu-fanhua
+yarn content:scaffold-scene --id gusu-fanhua
 
 # 5) 校验
-pnpm content:validate --id gusu-fanhua
+yarn content:validate --id gusu-fanhua
 
 # 6) 预览
-pnpm content:preview --id gusu-fanhua
-# → apps/viewer?scroll=gusu-fanhua
+yarn content:preview
+# → apps/viewer/?scroll=gusu-fanhua
 
 # 7) 写 story → 再 validate + preview + e2e（可选）
 ```

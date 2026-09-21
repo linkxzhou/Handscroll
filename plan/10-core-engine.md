@@ -267,14 +267,14 @@ RAF、DOM 监听、进行中的 fetch、Pixi 纹理/容器、Three 几何材质�
 ```json
 {
   "scripts": {
-    "typecheck": "pnpm -r typecheck",
+    "typecheck": "yarn workspaces foreach -A --exclude handscroll run typecheck",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "test:dep": "node tools/check-deps.mjs",
     "test:engine": "vitest run packages/core packages/tiles packages/assets packages/interaction",
-    "playground": "pnpm --filter playground dev",
-    "test:e2e": "pnpm --filter viewer exec playwright test",
-    "bench:tiles": "pnpm --filter playground exec node ../../tools/bench-tiles.mjs"
+    "playground": "yarn workspace @handscroll/playground dev",
+    "test:e2e": "yarn workspace @handscroll/viewer exec playwright test",
+    "bench:tiles": "yarn workspace @handscroll/playground exec node ../../tools/bench-tiles.mjs"
   }
 }
 ```

@@ -140,7 +140,7 @@ tools/qingming-adapt/
 
 1. `stitch-districts`：用 `street-empty` + `district-west` + `district-east` 按参考拼缝规则烘焙 `raw/background.webp`（6516×724 量级）。  
 2. 写入 `meta.json`（width/height、defaultViewport、plugins: `["quality","guide"]`、license）。  
-3. `pnpm content:tiles -- --id qingming-riverside`。  
+3. `yarn content:tiles --id qingming-riverside`。  
 4. `scene.json`：空实体或仅 chapters 四个书签（水磨 / 茶市 / 虹桥 / 城门），坐标经 `+2172` 映射并人工微调。  
 5. `story/index.ts` 可先空实现（只 return cleanup）。  
 
@@ -309,11 +309,11 @@ export function registerStory(engine: ScrollEnginePublic): () => void {
 ### 脚本
 
 ```bash
-pnpm content:tiles -- --id qingming-riverside
-pnpm content:validate -- --id qingming-riverside
-pnpm playground   # ?scroll=qingming-riverside
-pnpm test:unit
-pnpm test:content
+yarn content:tiles --id qingming-riverside
+yarn content:validate --id qingming-riverside
+yarn playground   # ?scroll=qingming-riverside
+yarn test:unit
+yarn test:content
 ```
 
 ### 用例表

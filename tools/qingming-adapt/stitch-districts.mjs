@@ -21,7 +21,7 @@ async function main() {
   try {
     sharp = (await import("sharp")).default;
   } catch {
-    console.error("sharp not installed. Use: pnpm add -Dw sharp");
+    console.error("sharp not installed. Use: yarn add -DW sharp");
     console.error("Or regenerate via the Python stitch documented in plan/40.");
     process.exit(1);
   }
