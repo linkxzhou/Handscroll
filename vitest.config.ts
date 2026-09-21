@@ -6,6 +6,7 @@ export default defineConfig({
     include: [
       "packages/**/*.test.ts",
       "tools/**/*.test.ts",
+      "contents/**/*.test.ts",
     ],
     environment: "node",
     restoreMocks: true,

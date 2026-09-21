@@ -111,7 +111,8 @@ export class ScrollEngine implements ScrollEnginePublic {
     if (this.options.contentResolver.loadStory) {
       const story = await this.options.contentResolver.loadStory(scrollId, storyEntry);
       if (story?.registerStory) {
-        await story.registerStory(this);
+        const registered = await story.registerStory(this);
+        if (typeof registered === "function") this.storyCleanup = registered;
       }
     }
 

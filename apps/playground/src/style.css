@@ -94,3 +94,41 @@ html, body {
 .guide-rail__dot:hover {
   background: rgba(196, 120, 74, 0.85);
 }
+
+.qingming-boat {
+  position: absolute;
+  pointer-events: none;
+  object-fit: contain;
+  user-select: none;
+  z-index: 3;
+}
+
+.qingming-pin {
+  position: absolute;
+  z-index: 4;
+  transform: translate(-50%, -100%);
+  pointer-events: auto;
+  border: 1px solid rgba(243, 230, 210, 0.45);
+  background: rgba(18, 14, 11, 0.82);
+  color: #f3e6d2;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.qingming-panel {
+  position: absolute;
+  right: 16px;
+  top: 56px;
+  z-index: 5;
+  width: min(320px, calc(100% - 32px));
+  pointer-events: auto;
+  background: rgba(18, 14, 11, 0.92);
+  color: #f3e6d2;
+  border: 1px solid rgba(243, 230, 210, 0.25);
+  border-radius: 10px;
+  padding: 12px 14px 14px;
+}

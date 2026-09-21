@@ -7,7 +7,16 @@ import { createPixiRenderer } from "@handscroll/renderer-pixi";
 import { createLazyThreeRenderer } from "@handscroll/renderer-three";
 import { builtinPlugins } from "@handscroll/plugins";
 import { createFetchResolver } from "@handscroll/scene";
-import type { QualityLevel } from "@handscroll/core";
+import type { QualityLevel, StoryModule } from "@handscroll/core";
+
+const storyLoaders = import.meta.glob("../../../contents/*/story/index.ts");
+
+async function loadStory(scrollId: string): Promise<StoryModule | null> {
+  const needle = `/contents/${scrollId}/story/index.ts`;
+  const key = Object.keys(storyLoaders).find((k) => k.replaceAll("\\", "/").endsWith(needle));
+  if (!key) return null;
+  return (await storyLoaders[key]!()) as StoryModule;
+}
 
 export async function bootHandscroll(container: HTMLElement, scrollId: string): Promise<ScrollEngine> {
   const assets = new AssetManager();
@@ -18,7 +27,7 @@ export async function bootHandscroll(container: HTMLElement, scrollId: string): 
       container,
       renderers: { pixi: true, three: "lazy" },
       quality: "auto",
-      contentResolver: createFetchResolver({ baseUrl: "/contents" }),
+      contentResolver: createFetchResolver({ baseUrl: "/contents", loadStory }),
       adapters: {
         createPixi: createPixiRenderer,
         createThree: createLazyThreeRenderer,

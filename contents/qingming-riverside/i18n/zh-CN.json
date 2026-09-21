@@ -1,0 +1,19 @@
+{
+  "chapter.watermill": "水磨",
+  "chapter.teahouse": "茶市",
+  "chapter.bridge": "虹桥",
+  "chapter.gate": "城门",
+  "hotspot.watermill.title": "水磨作坊",
+  "hotspot.watermill.body": "西段水磨与陶作。水轮汲河水驱动磨盘，邻侧窑棚陈列陶坯。此为原创生成插画，并非宋画原作扫描。",
+  "hotspot.teahouse.title": "沿河茶铺",
+  "hotspot.teahouse.body": "中央偏左的二层茶楼。食客临河而坐，店家往来斟茶。点击西岸码头可唤渡船。",
+  "hotspot.bridge.title": "虹桥",
+  "hotspot.bridge.body": "中央木构拱桥。桥下行船，桥上行人。完整「虹桥过船」接绳玩法将在后续版本接入。",
+  "hotspot.gate.title": "城门货市",
+  "hotspot.gate.body": "东段城门与仓场。券门内是街巷，门外堆放竹木与货包。",
+  "hotspot.dockWest.title": "西岸码头",
+  "hotspot.dockWest.body": "茶楼前的西岸泊位。点击码头召唤渡船：若船已在此岸，则驶向对岸；否则驶来此岸。",
+  "hotspot.dockEast.title": "东岸码头",
+  "hotspot.dockEast.body": "虹桥以东的石阶码头。点击召唤渡船，作一次简化横渡。",
+  "ferry.summoned": "渡船应召"
+}

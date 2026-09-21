@@ -246,12 +246,12 @@ tools/qingming-adapt/
 
 | id | 语义 | 参考系大致位置 | 引擎 x（+2172 后） |
 |---|---|---|---|
-| watermill | 水磨 | 西段 | ~800–1200 |
-| teahouse | 茶市 | 中央偏左 | ~2800 |
-| bridge | 虹桥 | 中央 | ~3200–3600 |
-| gate | 城门 | 东段 | ~5500 |
+| watermill | 水磨 | 西段 `data-x=-1550` | 622 |
+| teahouse | 茶市 | 中央偏左 `data-x=650` | 2822 |
+| bridge | 虹桥 | 中央 `data-x=1560` | 3732 |
+| gate | 城门 | 东段 `data-x=3360` | 5532 |
 
-具体数字以 Phase A 烘焙图上点选为准，写入 `scene.json`，并在 `plan/40` 附录更新「标定表」。
+标定：上游章节圆点 `data-x` +2172，centerY=400 以同时框住街面与河。热点矩形按拼接底图微调（见 `contents/qingming-riverside/scene.json`）。
 
 ---
 
@@ -331,22 +331,22 @@ pnpm test:content
 
 **A 底图**
 
-- [ ] 实现 `tools/qingming-adapt/stitch-districts.mjs`  
-- [ ] 产出 `contents/qingming-riverside/raw/background.webp` + raw/README  
-- [ ] meta + 空/章节 scene + tiles  
-- [ ] playground 验收截图  
+- [x] 实现 `tools/qingming-adapt/stitch-districts.mjs`
+- [x] 产出 `contents/qingming-riverside/raw/background.webp` + raw/README
+- [x] meta + 空/章节 scene + tiles
+- [ ] playground 验收截图
 
 **B 导览**
 
-- [ ] 热点标定与 i18n  
-- [ ] guide 四章节最终坐标  
+- [x] 热点标定与 i18n
+- [x] guide 四章节最终坐标
 
 **C 动态最小集**
 
-- [ ] 人物/船 sprite 接入  
-- [ ] ferry 简化状态机 + 单测  
+- [x] 人物/船 sprite 接入
+- [x] ferry 简化状态机 + 单测
 
-**D/E/F** 按优先级单独立项  
+**D/E/F** 按优先级单独立项
 
 ---
 

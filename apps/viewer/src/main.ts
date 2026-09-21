@@ -8,8 +8,17 @@ import { createPixiRenderer } from "@handscroll/renderer-pixi";
 import { createLazyThreeRenderer } from "@handscroll/renderer-three";
 import { builtinPlugins } from "@handscroll/plugins";
 import { createFetchResolver } from "@handscroll/scene";
+import type { StoryModule } from "@handscroll/core";
 
-const KNOWN_SCROLLS = ["demo-scroll"];
+const KNOWN_SCROLLS = ["demo-scroll", "qingming-riverside"];
+const storyLoaders = import.meta.glob("../../../contents/*/story/index.ts");
+
+async function loadStory(scrollId: string): Promise<StoryModule | null> {
+  const needle = `/contents/${scrollId}/story/index.ts`;
+  const key = Object.keys(storyLoaders).find((k) => k.replaceAll("\\", "/").endsWith(needle));
+  if (!key) return null;
+  return (await storyLoaders[key]!()) as StoryModule;
+}
 
 const container = document.querySelector<HTMLElement>("#app");
 const select = document.querySelector<HTMLSelectElement>("#scroll");
@@ -34,7 +43,7 @@ const engine = await ScrollEngine.create(
   {
     container,
     renderers: { pixi: true, three: "lazy" },
-    contentResolver: createFetchResolver({ baseUrl: "/contents" }),
+    contentResolver: createFetchResolver({ baseUrl: "/contents", loadStory }),
     adapters: {
       createPixi: createPixiRenderer,
       createThree: createLazyThreeRenderer,

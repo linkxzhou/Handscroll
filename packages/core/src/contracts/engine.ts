@@ -104,7 +104,7 @@ export interface SceneDocument {
 }
 
 export interface StoryModule {
-  registerStory?(engine: unknown): void | Promise<void>;
+  registerStory?(engine: unknown): void | (() => void) | Promise<void | (() => void)>;
 }
 
 export interface VisibleTile {

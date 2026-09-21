@@ -4,6 +4,7 @@ import { MetaSchema, SceneSchema } from "./schema.ts";
 export interface FetchResolverOptions {
   baseUrl?: string;
   fetchImpl?: typeof fetch;
+  loadStory?: ContentResolver["loadStory"];
 }
 
 export function createFetchResolver(options: FetchResolverOptions = {}): ContentResolver {
@@ -37,7 +38,8 @@ export function createFetchResolver(options: FetchResolverOptions = {}): Content
       const rel = relativePath.replace(/^\.\//, "");
       return `${baseUrl}/${scrollId}/${rel}`;
     },
-    async loadStory(_scrollId: string, _entry: string): Promise<StoryModule | null> {
+    async loadStory(scrollId: string, entry: string): Promise<StoryModule | null> {
+      if (options.loadStory) return options.loadStory(scrollId, entry);
       return null;
     },
   };

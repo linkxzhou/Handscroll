@@ -17,10 +17,10 @@
   },
   "include": [
     "packages/**/*.ts",
-    "apps/**/*.ts",
     "tools/**/*.ts",
-    "tools/**/*.mjs",
+    "contents/*/story/**/*.ts",
+    "contents/**/*.test.ts",
     "vitest.config.ts"
   ],
-  "exclude": ["node_modules", "dist", "contents"]
+  "exclude": ["node_modules", "dist", "apps"]
 }
