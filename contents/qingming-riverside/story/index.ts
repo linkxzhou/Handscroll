@@ -4,7 +4,7 @@ import zh from "../i18n/zh-CN.json";
 import { createFerryController } from "./events/ferry.ts";
 import { createBridgeController, isBridgeTrigger } from "./events/bridge.ts";
 import { createAtmosphereController } from "./events/weather-night.ts";
-import { createStreetLifeController } from "./events/street-life.ts";
+import { createStreetLifeController, STREET_LIFE_Z_INDEX } from "./events/street-life.ts";
 import { worldToScreen } from "./coords.ts";
 
 type Copy = Record<string, string>;
@@ -208,29 +208,57 @@ const STORY_CSS = `
 }
 .qingming-walker {
   position: absolute;
-  z-index: 4;
+  z-index: ${STREET_LIFE_Z_INDEX};
   pointer-events: none;
-  width: 7px;
-  height: 16px;
-  margin-left: -3.5px;
-  margin-top: -16px;
-  border-radius: 3px 3px 2px 2px;
-  background: #3a2a22;
   transform-origin: 50% 100%;
+  filter:
+    drop-shadow(0 0 0.8px #f6ead6)
+    drop-shadow(0 0 1.4px #080604);
 }
-.qingming-walker.is-idle { opacity: 0.4; }
+.qingming-walker.is-idle { opacity: 0.78; }
+.qingming-walker__head,
+.qingming-walker__torso,
+.qingming-walker__leg {
+  position: absolute;
+  background: currentColor;
+}
+.qingming-walker__head {
+  left: 30%;
+  top: 0;
+  width: 40%;
+  height: 22%;
+  border-radius: 50%;
+}
+.qingming-walker__torso {
+  left: 10%;
+  top: 20%;
+  width: 80%;
+  height: 44%;
+  clip-path: polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%);
+}
+.qingming-walker__leg {
+  top: 60%;
+  width: 22%;
+  height: 40%;
+  border-radius: 0 0 40% 40%;
+}
+.qingming-walker__leg--l { left: 22%; }
+.qingming-walker__leg--r { right: 22%; }
 .qingming-shop {
   position: absolute;
-  z-index: 4;
-  transform: translate(-50%, -120%);
+  z-index: ${STREET_LIFE_Z_INDEX};
+  transform: translate(-50%, -130%);
   pointer-events: none;
-  font-size: 11px;
-  color: #f3e6d2;
-  background: rgba(18, 14, 11, 0.72);
-  border: 1px solid rgba(243, 230, 210, 0.3);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #f6ead6;
+  background: rgba(12, 9, 7, 0.88);
+  border: 1px solid rgba(243, 230, 210, 0.55);
   border-radius: 999px;
-  padding: 2px 7px;
+  padding: 3px 9px;
   white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(8, 6, 4, 0.45);
 }
 `;
 

@@ -13,7 +13,7 @@ yarn playground
 # engine HUD: http://localhost:5173/?scroll=qingming-riverside
 ```
 
-Drag to pan, wheel to zoom. Bottom dots fly to 水磨 / 茶市 / 虹桥 / 城门. Click a pin or hotspot for a short panel. Click 西岸/东岸码头 to run the ferry.
+Drag to pan, wheel to zoom. Bottom dots fly to 水磨 / 茶市 / 虹桥 / 城门. Click a pin or hotspot for a short panel. Click 西岸/东岸码头 to run the ferry. Opening frame is biased toward **茶市** so ink pedestrians and looping shop labels are in view; fly to **虹桥** / **城门** for the other two street paths.
 
 ### 虹桥过船
 
@@ -71,6 +71,7 @@ Reference-runtime coordinates map with `x' = x_ref + 2172`, `y' = y_ref` (`story
 | bridge-event | 过船 hotspot | 3660 |
 | water band | river AABB | y 520–724, full width |
 | street paths | pedestrians | 茶市 / 虹桥 / 城门 pavement |
+| default viewport | opening frame | x 3120 (biased toward 茶市; stitch center is 3258) |
 
 ## Versus upstream
 
@@ -86,7 +87,11 @@ See `plan/adr/0002-water-effect.md`. Chosen path **A**: lazy Three overlay (`ens
 
 ### Crowds / street-life
 
-Eight CSS silhouette walkers on three polylines (茶市, 虹桥, 城门) plus three looping shop labels. **Viewport active zone** (~viewport + 320wu) updates motion; farther figures idle or cull. Not ported: 141 mesh-deformed people, clothing dye cache, full shop dialogue, atlas pedestrians from `people-ink.webp`.
+Eight **ink silhouettes** walk three pavement polylines (茶市, 虹桥, 城门), with looping shop labels (茶肆/客满/斟茶, 桥头摊/卖果, 货摊/籴米). Figures are sized in **world units** (~22×52 on the 724-tall stitch, feet anchored) with a head/robe/legs clip and a light parchment outline, stacked **above** the night multiply wash (`z-index` 7; HUD stays at 8+). They should read as people on the street at default zoom — not 7×16 CSS-pixel stubs.
+
+**Viewport active zone** (~viewport + 320wu) updates motion; farther figures idle or cull. CSS-only: this pack does not ship `people-ink.webp` / overlay atlases (those live upstream under gitignored `third_party/`). Not ported: 141 mesh-deformed people, clothing dye cache, full shop dialogue.
+
+Esc on 过船, pack switch, and viewer **目录** all dispose walker/shop DOM.
 
 ### Audio gap
 
