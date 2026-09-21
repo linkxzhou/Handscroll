@@ -7,6 +7,7 @@ import type {
   RendererAdapter,
   SceneDocument,
   ScrollEnginePublic,
+  ThreeOverlayHost,
   VisibleTile,
 } from "./contracts/engine.ts";
 import { DEFAULT_CACHE_POLICY } from "./contracts/engine.ts";
@@ -184,6 +185,21 @@ export class ScrollEngine implements ScrollEnginePublic {
 
   getScrollId(): string | null {
     return this.scrollId;
+  }
+
+  async ensureThree(): Promise<ThreeOverlayHost | null> {
+    if (!this.three?.ensureLoaded) return null;
+    await this.three.ensureLoaded();
+    const adapter = this.three;
+    this.scheduler.requestFrame();
+    return {
+      attach(object: unknown) {
+        adapter.attachOverlay?.(object);
+      },
+      detach(object: unknown) {
+        adapter.detachOverlay?.(object);
+      },
+    };
   }
 
   getScene(): SceneDocument | null {

@@ -64,6 +64,22 @@ export const BRIDGE_CARGO_SCALE = {
   under: 0.42,
 } as const;
 
+/** Lower river strip on the stitch — pluginConfig.water.bands uses this AABB. */
+export const WATER_BAND = { x: 0, y: 520, w: WORLD_WIDTH, h: WORLD_HEIGHT - 520 } as const;
+
+/** Street-level polylines (upstream pavement ≈ y=477) after +2172. */
+export const STREET_PATHS = {
+  teahouse: [fromRef(420, 492), fromRef(650, 477), fromRef(920, 484)],
+  bridge: [fromRef(1380, 452), fromRef(1502, 414), fromRef(1680, 450)],
+  gate: [fromRef(3180, 502), fromRef(3360, 477), fromRef(3560, 492)],
+} as const;
+
+export const SHOPS = {
+  teahouse: fromRef(650, 444),
+  bridgeStall: fromRef(1460, 458),
+  gateStall: fromRef(3320, 498),
+} as const;
+
 /** Upstream `#district-stops` data-x values, remapped and vertically framed on the stitch. */
 export const CHAPTERS = {
   watermill: { centerX: fromRef(-1550, 0).x, centerY: 400, zoom: 1.15 },
@@ -81,4 +97,43 @@ export function worldToScreen(
     x: (x - viewport.centerX) * viewport.zoom + viewport.screenWidth / 2,
     y: (y - viewport.centerY) * viewport.zoom + viewport.screenHeight / 2,
   };
+}
+
+export function polylineLength(points: readonly WorldPoint[]): number {
+  let length = 0;
+  for (let i = 1; i < points.length; i += 1) {
+    const a = points[i - 1]!;
+    const b = points[i]!;
+    length += Math.hypot(b.x - a.x, b.y - a.y);
+  }
+  return length;
+}
+
+export function pointAlong(points: readonly WorldPoint[], distance: number): WorldPoint {
+  if (points.length === 0) return { x: 0, y: 0 };
+  if (points.length === 1) return { x: points[0]!.x, y: points[0]!.y };
+  let remaining = Math.max(0, distance);
+  for (let i = 1; i < points.length; i += 1) {
+    const a = points[i - 1]!;
+    const b = points[i]!;
+    const seg = Math.hypot(b.x - a.x, b.y - a.y);
+    if (remaining <= seg || i === points.length - 1) {
+      const t = seg === 0 ? 0 : Math.min(1, remaining / seg);
+      return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
+    }
+    remaining -= seg;
+  }
+  const last = points[points.length - 1]!;
+  return { x: last.x, y: last.y };
+}
+
+export function inActiveZone(
+  x: number,
+  y: number,
+  viewport: { centerX: number; centerY: number; zoom: number; screenWidth: number; screenHeight: number },
+  margin = 320,
+): boolean {
+  const halfW = viewport.screenWidth / (2 * viewport.zoom) + margin;
+  const halfH = viewport.screenHeight / (2 * viewport.zoom) + margin;
+  return Math.abs(x - viewport.centerX) <= halfW && Math.abs(y - viewport.centerY) <= halfH;
 }

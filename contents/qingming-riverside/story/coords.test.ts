@@ -10,8 +10,13 @@ import {
   WORLD_WIDTH,
   fromRef,
   inWorld,
+  pointAlong,
+  polylineLength,
   toRef,
   worldToScreen,
+  STREET_PATHS,
+  SHOPS,
+  WATER_BAND,
 } from "./coords.ts";
 
 describe("qingming coords Q-A-03", () => {
@@ -36,6 +41,12 @@ describe("qingming coords Q-A-03", () => {
       BRIDGE_PATH.underEnd,
       BRIDGE_APEX,
       { x: BRIDGE_OCCLUDER.x, y: BRIDGE_OCCLUDER.y },
+      ...STREET_PATHS.teahouse,
+      ...STREET_PATHS.bridge,
+      ...STREET_PATHS.gate,
+      SHOPS.teahouse,
+      SHOPS.bridgeStall,
+      SHOPS.gateStall,
     ];
     for (const p of samples) {
       expect(inWorld(p.x, p.y)).toBe(true);
@@ -61,5 +72,13 @@ describe("qingming coords Q-A-03", () => {
       50,
     );
     expect(screen).toEqual({ x: 100, y: 50 });
+  });
+
+  it("keeps the river band and street polylines on the stitch", () => {
+    expect(WATER_BAND.y + WATER_BAND.h).toBe(WORLD_HEIGHT);
+    expect(polylineLength(STREET_PATHS.teahouse)).toBeGreaterThan(0);
+    const mid = pointAlong(STREET_PATHS.teahouse, polylineLength(STREET_PATHS.teahouse) / 2);
+    expect(inWorld(mid.x, mid.y)).toBe(true);
+    expect(inWorld(SHOPS.gateStall.x, SHOPS.gateStall.y)).toBe(true);
   });
 });

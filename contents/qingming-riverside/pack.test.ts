@@ -18,7 +18,7 @@ describe("qingming-riverside pack load Q-A-02", () => {
     expect(meta.id).toBe("qingming-riverside");
     expect(meta.width).toBe(6516);
     expect(meta.height).toBe(724);
-    expect(meta.plugins).toEqual(["quality", "guide", "audio"]);
+    expect(meta.plugins).toEqual(["quality", "guide", "audio", "weather", "water"]);
     expect(scene.chapters.map((c) => c.id)).toEqual(["watermill", "teahouse", "bridge", "gate"]);
     expect(scene.entities.some((e) => e.id === "ferry-boat" && e.type === "sprite")).toBe(true);
     expect(scene.entities.some((e) => e.id === "bridge-event" && e.type === "hotspot")).toBe(true);
@@ -51,6 +51,25 @@ describe("qingming-riverside pack load Q-A-02", () => {
       }
     };
     walk(coreDir);
+    expect(hits).toEqual([]);
+  });
+
+  it("does not hard-code qingming business into packages/plugins (P-R-01)", () => {
+    const pluginsDir = path.resolve(packDir, "../../packages/plugins");
+    const hits: string[] = [];
+    const walk = (dir: string) => {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          if (entry.name === "node_modules" || entry.name === "dist") continue;
+          walk(full);
+        } else if (/\.(ts|js|md)$/.test(entry.name)) {
+          const src = fs.readFileSync(full, "utf8");
+          if (/qingming|虹桥/i.test(src)) hits.push(path.relative(pluginsDir, full));
+        }
+      }
+    };
+    walk(pluginsDir);
     expect(hits).toEqual([]);
   });
 });

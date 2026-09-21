@@ -24,5 +24,17 @@
   "bridge.approaching": "货船正在靠近虹桥",
   "bridge.mast": "船工正在降桅。按住牵绳协助，或旁观等待。",
   "bridge.under": "船正在过桥。继续牵绳或旁观。",
-  "bridge.done": "船已通过虹桥。"
+  "bridge.done": "船已通过虹桥。",
+  "atmo.toolbar": "氛围",
+  "atmo.rain": "时雨",
+  "atmo.night": "夜景",
+  "atmo.water": "水面",
+  "atmo.audio": "音效",
+  "shop.teahouse": "茶肆",
+  "shop.teahouseBusy": "客满",
+  "shop.teahousePour": "斟茶",
+  "shop.bridge": "桥头摊",
+  "shop.bridgeFruit": "卖果",
+  "shop.gate": "货摊",
+  "shop.gateGrain": "籴米"
 }

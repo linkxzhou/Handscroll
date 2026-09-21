@@ -10,11 +10,15 @@
     "centerY": 362,
     "zoom": 0.9
   },
-  "plugins": ["quality", "guide", "audio"],
+  "plugins": ["quality", "guide", "audio", "weather", "water"],
   "pluginConfig": {
     "quality": { "default": "auto" },
     "guide": { "showChapterDots": true },
-    "audio": { "defaultMuted": true }
+    "audio": { "defaultMuted": true },
+    "water": {
+      "enabled": true,
+      "bands": [{ "x": 0, "y": 520, "w": 6516, "h": 204 }]
+    }
   },
   "storyEntry": "./story/index.ts",
   "license": {

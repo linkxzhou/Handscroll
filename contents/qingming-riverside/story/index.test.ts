@@ -4,6 +4,7 @@ import { EventBus } from "@handscroll/core";
 import { registerStory } from "./index.ts";
 import { FERRY_CONTINUOUS_REASON } from "./events/ferry.ts";
 import { BRIDGE_CONTINUOUS_REASON } from "./events/bridge.ts";
+import { STREET_CONTINUOUS_REASON } from "./events/street-life.ts";
 
 function mockEngine(): ScrollEnginePublic & { continuous: Set<string> } {
   const events = new EventBus();
@@ -40,6 +41,7 @@ function mockEngine(): ScrollEnginePublic & { continuous: Set<string> } {
     getUiLayer: () => ({ appendChild: (n: unknown) => n }) as HTMLElement,
     getDpr: () => 1,
     getScrollId: () => "qingming-riverside",
+    ensureThree: async () => null,
   };
 }
 
@@ -79,6 +81,24 @@ describe("qingming registerStory pack load", () => {
       worldY: 0,
     });
     expect(engine.continuous.has(BRIDGE_CONTINUOUS_REASON)).toBe(false);
+    expect(() => cleanup()).not.toThrow();
+  });
+
+  it("disposes atmosphere HUD, street-life, ferry, and bridge together", () => {
+    const engine = mockEngine();
+    const cleanup = registerStory(engine);
+    engine.events.emit("entity:click", {
+      entityId: "bridge-event",
+      renderer: "pixi",
+      interactionPriority: 1,
+      worldX: 0,
+      worldY: 0,
+    });
+    expect(engine.continuous.has(BRIDGE_CONTINUOUS_REASON)).toBe(true);
+    cleanup();
+    expect(engine.continuous.has(BRIDGE_CONTINUOUS_REASON)).toBe(false);
+    expect(engine.continuous.has(FERRY_CONTINUOUS_REASON)).toBe(false);
+    expect(engine.continuous.has(STREET_CONTINUOUS_REASON)).toBe(false);
     expect(() => cleanup()).not.toThrow();
   });
 });
