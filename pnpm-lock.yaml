@@ -120,6 +120,9 @@ importers:
       '@handscroll/core':
         specifier: workspace:*
         version: link:../core
+      '@handscroll/renderer-three':
+        specifier: workspace:*
+        version: link:../renderer-three
       zod:
         specifier: ^3.24.2
         version: 3.25.76

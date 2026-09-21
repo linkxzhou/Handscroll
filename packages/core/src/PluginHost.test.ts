@@ -25,6 +25,7 @@ function stubCtx(): EngineContext {
       getUiLayer: () => ({}) as HTMLElement,
       getDpr: () => 1,
       getScrollId: () => null,
+      ensureThree: async () => null,
     },
     scene: null,
     quality: "auto",

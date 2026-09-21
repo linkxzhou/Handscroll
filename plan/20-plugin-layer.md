@@ -152,22 +152,19 @@ z.object({
 
 **测试：** 默认 muted；unlock 前 play 不抛错；hidden → mute。
 
-### 4.4 weather（P2 stub）
+### 4.4 weather（P2）
 
-**职责：** 定义 `setWeather("clear"|"rain"|…)` 与 `onFrame` 扩展点；首版可只改 CSS 滤镜或发事件，供业务/后续视觉实现。
+**职责：** `setWeather("clear"|"rain"|…)` via `weather:set`；首版 CSS/DOM 雨幕（可 mist/snow 占位）。`onSceneUnload` / `onDestroy` 必须卸 overlay。
 
-**测试：** API 可调用；未实现视觉时不崩。
+**测试：** API 可调用；clear↔rain round-trip；无 DOM 时不崩。
 
-### 4.5 water（P2，需 ADR）
+### 4.5 water（P2，ADR 0002 = A）
 
-**职责：** 河面/水面特效。对照参考项目 `water-three.js`，在 playground 对比：
+**决策：** lazy Three 透明河面（`ensureThree` + `createWaterEffect`），无 Three 时 DOM shimmer fallback。详见 [adr/0002-water-effect.md](./adr/0002-water-effect.md)。
 
-- A：Three 透明层（插件依赖 `renderer-three`）  
-- B：Pixi filter / shader  
+Pack 通过 `meta.plugins` 启用并提供 `pluginConfig.water.bands`。禁止 stub `console.info`。
 
-**决策写入** `plan/adr/0002-water-effect.md` 后再填实现。在此之前 registry 可注册但 `meta.plugins` 默认不包含。
-
-**测试（决策后）：** 启用水面与世界坐标漂移 ≤ 阈值；关插件零 three 水相关 draw。
+**测试：** 启用水面世界坐标映射；关插件 / unload 无残留；ensureThree 失败不抛。
 
 ## 5. 插件与渲染/实体协作
 
@@ -240,7 +237,8 @@ onSceneUnload / destroy content-local plugins
 - PluginHost 单测 P-U-01..03 绿  
 - quality + guide 可经 meta 启用，e2e 冒烟绿  
 - audio 总线默认静音可用  
-- weather/water：stub 或 ADR 完成后再标完成  
+- weather：`weather:set` + CSS overlay，unload 清理  
+- water：ADR 0002 已落地；lazy Three + DOM fallback  
 - P-R-01 进 CI  
 
 ## 10. 排期

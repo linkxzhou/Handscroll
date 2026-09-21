@@ -14,9 +14,11 @@ export type {
   VisibleTile,
   RendererAdapter,
   RendererFactories,
+  ThreeOverlayHost,
   ScrollEnginePublic,
   StoryModule,
   SchedulerLike,
+  EventBusLike,
 } from "./contracts/engine.ts";
 export { DEFAULT_CACHE_POLICY } from "./contracts/engine.ts";
 export type { ScrollPlugin, EngineContext, PluginFactory } from "./contracts/plugin.ts";

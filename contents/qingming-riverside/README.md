@@ -1,6 +1,6 @@
 # 沿河街市（清明上河图式）
 
-Handscroll content pack `qingming-riverside`. First real painting pack: stitch, chapters, hotspots, a simplified ferry, and **虹桥过船**.
+Handscroll content pack `qingming-riverside`. First real painting pack: stitch, chapters, hotspots, a simplified ferry, **虹桥过船**, atmosphere (时雨 / 夜景 / 水面), and a modest street-life overlay.
 
 ## Open
 
@@ -25,6 +25,19 @@ Start the simplified crossing (content-pack story, not core):
 The cargo boat (same `atlas/boat.webp` as the ferry) approaches from downstream, lowers its mast, then passes the arch. Hold **牵绳** (or Left Arrow / E) to help; spectating still completes the path. **Escape** cancels and removes overlays.
 
 **Faked occlusion:** Handscroll tiles are a single layer, so the hull is not clipped through the painted arch. While the boat is under the bridge, a DOM strip (`.qingming-bridge-occluder`) sits above the sprite. This is a stand-in for upstream Canvas2D arch masking — not 1:1 with `qingming-riverside` `bridge-art.js`.
+
+### 时雨 / 夜景 / 水面
+
+Left-bottom pills sit above **过船** (same HUD language as ferry/bridge):
+
+| 按钮 | 行为 |
+|---|---|
+| **时雨** | `weather:set` → `rain` / `clear`. First-pass visual is a CSS rain sheet from the `weather` plugin (not a particle sim). |
+| **夜景** | Pack-local **multiply color wash** over the viewport. **Not** a second night tile set. Approximation only. |
+| **水面** | Toggles the `water` plugin. Primary path is a **lazy Three** translucent river plane (ADR 0002). If Three/WebGL is missing, a titled DOM shimmer band is the gated fallback. |
+| **音效** | Unmutes the `audio` plugin (`defaultMuted: true`). Rain/water cues are **procedural WebAudio noise**, not bundled mp3. |
+
+Switching to `demo-scroll` (viewer pack select) or unloading the scene disposes HUD, night wash, walkers, weather overlay, and water meshes — same hygiene as ferry/bridge.
 
 If `tiles/` is missing locally:
 
@@ -55,14 +68,33 @@ Reference-runtime coordinates map with `x' = x_ref + 2172`, `y' = y_ref` (`story
 | gate | chapter | 5532 |
 | dock-west / dock-east | ferry | 2802 / 4257 (berths) |
 | bridge-event | 过船 hotspot | 3660 |
+| water band | river AABB | y 520–724, full width |
+| street paths | pedestrians | 茶市 / 虹桥 / 城门 pavement |
 
-## Versus upstream `bridge-event`
+## Versus upstream
 
 Playable subset of the reference state machine (approach → mast/haul → under arch → done/cancel). Not ported: Canvas2D runtime, crowd reactions, painter “record” stills, drag-force crash-avoidance, or exact 90s+ timing.
 
-## Out of scope (Phase E / F, still deferred)
+### Night (faked)
 
-- Weather / night / Three water (ADR)
-- Crowd / street-life port
+Upstream night could swap lighting on the full scene. This pack uses a **multiply/color wash overlay** only. Tiles stay the daylight stitch. Lamp-by-lamp lighting and dual tile sets are omitted.
+
+### Water
+
+See `plan/adr/0002-water-effect.md`. Chosen path **A**: lazy Three overlay (`ensureLoaded` / `ensureThree`), not a Pixi filter. The river band is a translucent sine-wave plane. It is **not** the upstream `water-three.js` port (no refraction mesh, no per-pixel river mask). DOM fallback exists for headless/no-WebGL and is documented on the element title.
+
+### Crowds / street-life
+
+Eight CSS silhouette walkers on three polylines (茶市, 虹桥, 城门) plus three looping shop labels. **Viewport active zone** (~viewport + 320wu) updates motion; farther figures idle or cull. Not ported: 141 mesh-deformed people, clothing dye cache, full shop dialogue, atlas pedestrians from `people-ink.webp`.
+
+### Audio gap
+
+No upstream/unlicensed mp3 is copied into this pack. Ambient rain/water is optional filtered noise through the `audio` plugin, muted until **音效**.
+
+## Out of scope (still deferred)
+
+- Dual night tile sets / per-lamp lighting
+- Full `water-three.js` refraction and river mask
+- 141-person street sim and people atlas
 - Exact 1:1 parity with the upstream minigame feel
 - `third_party/` (gitignored; do not commit)

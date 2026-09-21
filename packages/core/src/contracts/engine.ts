@@ -122,6 +122,12 @@ export interface VisibleTile {
   priority: number;
 }
 
+/** Opaque Three overlay objects (typically `THREE.Object3D`). Core does not import three. */
+export interface ThreeOverlayHost {
+  attach(object: unknown): void;
+  detach(object: unknown): void;
+}
+
 export interface RendererAdapter {
   readonly kind: "pixi" | "three";
   mount(container: HTMLElement): Promise<HTMLCanvasElement>;
@@ -130,6 +136,8 @@ export interface RendererAdapter {
   setTiles?(tiles: readonly VisibleTile[]): void;
   needsThree?(): boolean;
   ensureLoaded?(): Promise<void>;
+  attachOverlay?(object: unknown): void;
+  detachOverlay?(object: unknown): void;
   render(): void;
   destroy(): void;
 }
@@ -178,6 +186,11 @@ export interface ScrollEnginePublic {
   getUiLayer(): HTMLElement;
   getDpr(): number;
   getScrollId(): string | null;
+  /**
+   * Lazy-load the Three overlay if this viewer mounted one.
+   * Resolves `null` when `renderers.three` is false or the adapter is missing.
+   */
+  ensureThree(): Promise<ThreeOverlayHost | null>;
 }
 
 export interface TileSystem {

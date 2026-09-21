@@ -3,6 +3,8 @@ import scene from "../scene.json";
 import zh from "../i18n/zh-CN.json";
 import { createFerryController } from "./events/ferry.ts";
 import { createBridgeController, isBridgeTrigger } from "./events/bridge.ts";
+import { createAtmosphereController } from "./events/weather-night.ts";
+import { createStreetLifeController } from "./events/street-life.ts";
 import { worldToScreen } from "./coords.ts";
 
 type Copy = Record<string, string>;
@@ -37,7 +39,7 @@ const STORY_CSS = `
   position: absolute;
   right: 16px;
   top: 56px;
-  z-index: 5;
+  z-index: 9;
   width: min(320px, calc(100% - 32px));
   pointer-events: auto;
   background: rgba(18, 14, 11, 0.92);
@@ -75,7 +77,7 @@ const STORY_CSS = `
   position: absolute;
   left: 16px;
   bottom: 18px;
-  z-index: 6;
+  z-index: 8;
   pointer-events: auto;
   border: 1px solid rgba(243, 230, 210, 0.45);
   background: rgba(18, 14, 11, 0.82);
@@ -142,7 +144,7 @@ const STORY_CSS = `
   left: 50%;
   bottom: 72px;
   transform: translateX(-50%);
-  z-index: 6;
+  z-index: 8;
   pointer-events: none;
   display: flex;
   flex-wrap: wrap;
@@ -170,6 +172,66 @@ const STORY_CSS = `
 }
 .qingming-bridge-hud__haul.is-held { background: rgba(168, 92, 48, 0.95); }
 .qingming-bridge-hud__hint { font-size: 12px; opacity: 0.75; }
+.qingming-atmo {
+  position: absolute;
+  left: 16px;
+  bottom: 62px;
+  z-index: 8;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: min(280px, calc(100% - 32px));
+  pointer-events: none;
+}
+.qingming-atmo button {
+  pointer-events: auto;
+  border: 1px solid rgba(243, 230, 210, 0.45);
+  background: rgba(18, 14, 11, 0.82);
+  color: #f3e6d2;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.qingming-atmo button:hover { background: rgba(196, 120, 74, 0.9); }
+.qingming-atmo button.is-on { background: rgba(196, 120, 74, 0.92); }
+.qingming-night {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 28% 38%, rgba(48, 32, 16, 0.12), transparent 42%),
+    rgba(8, 12, 32, 0.5);
+  mix-blend-mode: multiply;
+}
+.qingming-walker {
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+  width: 7px;
+  height: 16px;
+  margin-left: -3.5px;
+  margin-top: -16px;
+  border-radius: 3px 3px 2px 2px;
+  background: #3a2a22;
+  transform-origin: 50% 100%;
+}
+.qingming-walker.is-idle { opacity: 0.4; }
+.qingming-shop {
+  position: absolute;
+  z-index: 4;
+  transform: translate(-50%, -120%);
+  pointer-events: none;
+  font-size: 11px;
+  color: #f3e6d2;
+  background: rgba(18, 14, 11, 0.72);
+  border: 1px solid rgba(243, 230, 210, 0.3);
+  border-radius: 999px;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
 `;
 
 interface PanelPayload {
@@ -183,6 +245,8 @@ export function registerStory(engine: ScrollEnginePublic): () => void {
   ensureStyles();
   const ferry = createFerryController(engine);
   const bridge = createBridgeController(engine);
+  const atmosphere = createAtmosphereController(engine);
+  const street = createStreetLifeController(engine);
   const pins = mountPins(engine);
   let panel: HTMLElement | null = null;
   let pinRaf = 0;
@@ -280,6 +344,8 @@ export function registerStory(engine: ScrollEnginePublic): () => void {
     if (typeof document !== "undefined") document.removeEventListener("keydown", onKey);
     ferry.dispose();
     bridge.dispose();
+    atmosphere.dispose();
+    street.dispose();
     closePanel();
     for (const pin of pins) pin.el.remove();
     if (typeof document !== "undefined") document.getElementById(STYLE_ID)?.remove();

@@ -203,18 +203,22 @@ tools/qingming-adapt/
 
 | 项 | 依赖 | 策略 |
 |---|---|---|
-| 时雨 | `weather` 插件 | 插件先 stub API，story 调 `setWeather`；视觉可先 CSS/滤镜 |
-| 夜景 | 业务或插件 | 优先乘色/双套瓦片（成本高）→ 首版乘色叠加 |
-| 水效 | `water` + Three | 等 ADR 0002；本 pack `meta.plugins` 再加 `water` |
-| 音效 | `audio` | 拷贝可授权 mp3 到 pack 或 contents 资源表，默认静音 |
+| 时雨 | `weather` 插件 | 插件 API `weather:set`；首版 CSS 雨幕 overlay，unload 清理 |
+| 夜景 | 业务 story | **乘色叠加**（非双套瓦片）；HUD「夜景」开关 |
+| 水效 | `water` + lazy Three | ADR 0002 选 **A**；`meta.plugins` 含 `water` + `pluginConfig.water.bands` |
+| 音效 | `audio` | 默认静音；程序化雨/水噪声，不捆绑未授权 mp3 |
+
+**验收：** playground 可开关时雨/夜景/水面；切 `demo-scroll` 无残留 HUD/overlay；单测 API round-trip。
 
 ---
 
-### Phase F — 人群与街市生活（长期）
+### Phase F — 人群与街市生活（简化可玩）
 
-- 批量实体：路径行人、店铺循环事件（参考 `street-life`）。  
-- 性能：活跃区（可见/附近/远处）、图集分包。  
-- 仅当 C/D 稳定后再开；可单独立项，不阻塞「可发布导览版」。
+- 茶市 / 虹桥 / 城门 三条路径的少量行人 + 店铺循环标签（pack-local DOM）。
+- 仅视口活跃区更新；远处 idle / cull。
+- **不做：** 141 人网格变形、服装染色、完整店铺对话。
+
+**验收：** 茶市附近能看到走动的剪影；切 pack 后行人 DOM 消失。
 
 ---
 
@@ -324,6 +328,10 @@ pnpm test:content
 | Q-C-01 | unit | ferry 状态机 | 序列转换与 dispose |
 | Q-C-02 | integration | 切到 demo | ferry 监听解除 |
 | Q-D-01 | manual | 过船主路径 | 可完成/可取消 |
+| Q-E-01 | unit | weather API | clear↔rain，无 DOM 不崩 |
+| Q-E-02 | manual | 时雨/夜景/水面 | HUD 可切换；夜景为乘色；水面可见或 fallback |
+| Q-F-01 | unit | street-life | 近处移动、远处冻结、dispose |
+| Q-F-02 | manual | 茶市行人 | 茶铺附近可见剪影；切 demo-scroll 无残留 |
 | Q-R-01 | regression | `rg` packages | 无 qingming 业务硬编码 |
 
 ---
@@ -339,20 +347,30 @@ pnpm test:content
 
 **B 导览**
 
-- [x] 热点标定与 i18n
-- [x] guide 四章节最终坐标
+- [x] 热点标定与 i18n  
+- [x] guide 四章节最终坐标  
 
 **C 动态最小集**
 
-- [x] 人物/船 sprite 接入
-- [x] ferry 简化状态机 + 单测
+- [x] 人物/船 sprite 接入  
+- [x] ferry 简化状态机 + 单测  
 
 **D 虹桥过船（简化）**
 
-- [x] `story/events/bridge.ts` 状态机 + 单测 + `registerStory` 与 ferry 一同 dispose
-- [x] 热点 `bridge-event` / 过船按钮 / Esc 取消
-- [ ] Phase E 时雨/夜景/水效（仍后置）
-- [ ] Phase F 人群街市（仍后置）
+- [x] `story/events/bridge.ts` 状态机 + 单测 + `registerStory` 与 ferry 一同 dispose  
+- [x] 热点 `bridge-event` / 过船按钮 / Esc 取消  
+
+**E 氛围**
+
+- [x] weather 插件：`setWeather` / `weather:set`、clear↔rain、CSS 雨幕、unload 清理  
+- [x] 夜景乘色叠加 + HUD「时雨/夜景」  
+- [x] ADR 0002（lazy Three A）+ water 插件可见河面 / DOM fallback；qingming `meta.plugins` 含 `water`  
+- [x] audio 默认静音；程序化雨/水 cue；不捆绑 mp3  
+
+**F 街市生活（简化）**
+
+- [x] 茶市/虹桥/城门路径行人 + 店铺循环标签  
+- [x] 视口活跃区更新；pack README 写清相对上游的省略  
 
 ---
 
