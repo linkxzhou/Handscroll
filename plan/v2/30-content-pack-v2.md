@@ -1,5 +1,7 @@
 # v2 内容包与作者流程
 
+> **实施状态：** 待 Phase 3 · Phase 0 已完成
+
 > 一幅画 = `contents/<scroll-id>/`。引擎不认识画名。  
 > v1 的 `content:new` / `content:tiles` / `content:scaffold-scene` / `content:validate` 保留。
 

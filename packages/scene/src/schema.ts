@@ -83,8 +83,7 @@ const Model3dSchema = z.object({
   ownerPluginId: z.string().optional(),
 });
 
-export const SceneSchema = z.object({
-  version: z.literal(1),
+const sceneCommon = {
   meta: z.object({
     id: z.string(),
     width: z.number().positive(),
@@ -106,6 +105,70 @@ export const SceneSchema = z.object({
       }),
     )
     .default([]),
+};
+
+/**
+ * Phase 0 keeps version 2 arrays opaque.
+ * Element schemas (path / actor / zone / spawn / dialogue / trigger) are Phase 1.
+ * Unknown keys on the document are stripped, not rejected (Zod's default).
+ */
+const deferredWorldArray = () => z.array(z.unknown()).default([]);
+
+/** Published v1 shape. World arrays are not part of this document and are stripped. */
+export const SceneSchemaV1 = z.object({
+  version: z.literal(1),
+  ...sceneCommon,
 });
 
-export type SceneJson = z.infer<typeof SceneSchema>;
+/**
+ * Version 2 is a superset of v1 (ADR 0004).
+ * Missing world arrays default to `[]`. Elements are preserved and not interpreted.
+ */
+export const SceneSchemaV2 = SceneSchemaV1.extend({
+  version: z.literal(2),
+  paths: deferredWorldArray(),
+  actors: deferredWorldArray(),
+  zones: deferredWorldArray(),
+  spawns: deferredWorldArray(),
+  dialogues: deferredWorldArray(),
+  triggers: deferredWorldArray(),
+});
+
+export type SceneJson = z.infer<typeof SceneSchemaV1> | z.infer<typeof SceneSchemaV2>;
+
+/**
+ * Accepts scene `version` 1 and 2. Rejects every other value, including ≥ 3,
+ * with an error that names the version. Does not rewrite v1 into v2
+ * (`toSceneV2` is Phase 1).
+ */
+export const SceneSchema = z
+  .object({ version: z.unknown().optional() })
+  .passthrough()
+  .transform((doc, ctx): SceneJson => {
+    if (doc.version !== 1 && doc.version !== 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["version"],
+        message: `Unsupported scene version ${formatSceneVersion(doc.version)}; accepted versions are 1 and 2`,
+      });
+      return z.NEVER;
+    }
+    const parsed = (doc.version === 1 ? SceneSchemaV1 : SceneSchemaV2).safeParse(doc);
+    if (!parsed.success) {
+      for (const issue of parsed.error.issues) ctx.addIssue(issue);
+      return z.NEVER;
+    }
+    return parsed.data;
+  });
+
+function formatSceneVersion(version: unknown): string {
+  if (typeof version === "string") return JSON.stringify(version);
+  if (version === undefined) return "undefined";
+  if (version === null) return "null";
+  if (typeof version === "number" || typeof version === "boolean" || typeof version === "bigint") return String(version);
+  try {
+    return JSON.stringify(version);
+  } catch {
+    return String(version);
+  }
+}

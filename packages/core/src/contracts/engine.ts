@@ -96,7 +96,12 @@ export interface Model3dEntity extends SceneEntityBase {
 }
 
 export interface SceneDocument {
-  version: 1;
+  /**
+   * `1` is the published v1 shape.
+   * `2` is that shape plus deferred world arrays (ADR 0004). Phase 0 accepts
+   * both; it does not interpret array elements.
+   */
+  version: 1 | 2;
   meta: SceneMeta;
   background: { manifestUrl: string };
   entities: SceneEntity[];
