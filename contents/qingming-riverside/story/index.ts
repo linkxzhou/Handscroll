@@ -2,39 +2,14 @@ import type { HitResult, ScrollEnginePublic } from "@handscroll/core";
 import scene from "../scene.json";
 import zh from "../i18n/zh-CN.json";
 import { createFerryController } from "./events/ferry.ts";
-import { createBridgeController, isBridgeTrigger } from "./events/bridge.ts";
-import { createAtmosphereController } from "./events/weather-night.ts";
-import { createStreetLifeController, STREET_LIFE_Z_INDEX } from "./events/street-life.ts";
-import { worldToScreen } from "./coords.ts";
+import { createBridgeController, isBridgeTrigger } from "./events/bridge-quest.ts";
+import { createAtmosphereController } from "./events/hud.ts";
 
 type Copy = Record<string, string>;
 const copy = zh as Copy;
 
 const STYLE_ID = "qingming-riverside-story-css";
 const STORY_CSS = `
-.qingming-boat {
-  position: absolute;
-  pointer-events: none;
-  object-fit: contain;
-  user-select: none;
-  z-index: 3;
-}
-.qingming-pin {
-  position: absolute;
-  z-index: 4;
-  transform: translate(-50%, -100%);
-  pointer-events: auto;
-  border: 1px solid rgba(243, 230, 210, 0.45);
-  background: rgba(18, 14, 11, 0.82);
-  color: #f3e6d2;
-  padding: 4px 8px;
-  border-radius: 999px;
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.qingming-pin:hover { background: rgba(196, 120, 74, 0.9); }
 .qingming-panel {
   position: absolute;
   right: 16px;
@@ -89,56 +64,6 @@ const STORY_CSS = `
   cursor: pointer;
 }
 .qingming-bridge-start:hover { background: rgba(196, 120, 74, 0.9); }
-.qingming-bridge-root { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
-.qingming-cargo {
-  position: absolute;
-  pointer-events: none;
-  z-index: 4;
-}
-.qingming-cargo__hull {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  user-select: none;
-}
-.qingming-mast {
-  position: absolute;
-  left: 46%;
-  bottom: 42%;
-  width: 4px;
-  height: 72%;
-  margin-left: -2px;
-  transform-origin: 50% 100%;
-  background: linear-gradient(180deg, #cbb496, #5c4633);
-  border-radius: 1px;
-  pointer-events: none;
-}
-.qingming-bridge-occluder {
-  position: absolute;
-  pointer-events: none;
-  z-index: 3;
-  opacity: 0;
-  background: linear-gradient(180deg, rgba(78, 58, 40, 0.05), rgba(48, 36, 26, 0.42));
-  mix-blend-mode: multiply;
-  clip-path: polygon(0% 45%, 12% 12%, 50% 0%, 88% 12%, 100% 45%, 100% 100%, 0% 100%);
-  transition: opacity 0.25s ease;
-}
-.qingming-bridge-occluder.is-active { opacity: 0.72; }
-.qingming-rope-svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  pointer-events: none;
-  z-index: 5;
-}
-.qingming-rope {
-  stroke: #6b5340;
-  stroke-width: 2.5;
-  stroke-linecap: round;
-}
 .qingming-bridge-hud {
   position: absolute;
   left: 50%;
@@ -196,70 +121,6 @@ const STORY_CSS = `
 }
 .qingming-atmo button:hover { background: rgba(196, 120, 74, 0.9); }
 .qingming-atmo button.is-on { background: rgba(196, 120, 74, 0.92); }
-.qingming-night {
-  position: absolute;
-  inset: 0;
-  z-index: 6;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse at 28% 38%, rgba(48, 32, 16, 0.12), transparent 42%),
-    rgba(8, 12, 32, 0.5);
-  mix-blend-mode: multiply;
-}
-.qingming-walker {
-  position: absolute;
-  z-index: ${STREET_LIFE_Z_INDEX};
-  pointer-events: none;
-  transform-origin: 50% 100%;
-  filter:
-    drop-shadow(0 0 0.8px #f6ead6)
-    drop-shadow(0 0 1.4px #080604);
-}
-.qingming-walker.is-idle { opacity: 0.78; }
-.qingming-walker__head,
-.qingming-walker__torso,
-.qingming-walker__leg {
-  position: absolute;
-  background: currentColor;
-}
-.qingming-walker__head {
-  left: 30%;
-  top: 0;
-  width: 40%;
-  height: 22%;
-  border-radius: 50%;
-}
-.qingming-walker__torso {
-  left: 10%;
-  top: 20%;
-  width: 80%;
-  height: 44%;
-  clip-path: polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%);
-}
-.qingming-walker__leg {
-  top: 60%;
-  width: 22%;
-  height: 40%;
-  border-radius: 0 0 40% 40%;
-}
-.qingming-walker__leg--l { left: 22%; }
-.qingming-walker__leg--r { right: 22%; }
-.qingming-shop {
-  position: absolute;
-  z-index: ${STREET_LIFE_Z_INDEX};
-  transform: translate(-50%, -130%);
-  pointer-events: none;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: #f6ead6;
-  background: rgba(12, 9, 7, 0.88);
-  border: 1px solid rgba(243, 230, 210, 0.55);
-  border-radius: 999px;
-  padding: 3px 9px;
-  white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(8, 6, 4, 0.45);
-}
 `;
 
 interface PanelPayload {
@@ -274,27 +135,7 @@ export function registerStory(engine: ScrollEnginePublic): () => void {
   const ferry = createFerryController(engine);
   const bridge = createBridgeController(engine);
   const atmosphere = createAtmosphereController(engine);
-  const street = createStreetLifeController(engine);
-  const pins = mountPins(engine);
   let panel: HTMLElement | null = null;
-  let pinRaf = 0;
-
-  const layoutPins = (): void => {
-    const vp = engine.getViewport();
-    for (const pin of pins) {
-      const screen = worldToScreen(vp, pin.x, pin.y);
-      pin.el.style.left = `${screen.x}px`;
-      pin.el.style.top = `${screen.y}px`;
-    }
-  };
-
-  const tickPins = (): void => {
-    pinRaf = 0;
-    layoutPins();
-    if (typeof requestAnimationFrame === "function") pinRaf = requestAnimationFrame(tickPins);
-  };
-  layoutPins();
-  if (typeof requestAnimationFrame === "function") pinRaf = requestAnimationFrame(tickPins);
 
   const closePanel = (): void => {
     panel?.remove();
@@ -343,21 +184,12 @@ export function registerStory(engine: ScrollEnginePublic): () => void {
       bridge.start("hotspot");
       return;
     }
-    if (hit.entityId.startsWith("dock-")) ferry.summon(hit.entityId);
     const entity = scene.entities.find((e) => e.id === hit.entityId);
     if (entity && "action" in entity && entity.action?.type === "openPanel") {
       const key = "i18nKey" in entity && typeof entity.i18nKey === "string" ? entity.i18nKey : entity.id;
       openPanel(entity.action.payload as PanelPayload | undefined, key);
     }
   };
-
-  const onPinClick = (entityId: string): void => {
-    onEntityClick({ entityId, renderer: "dom", interactionPriority: 1, worldX: 0, worldY: 0 } satisfies HitResult);
-  };
-
-  for (const pin of pins) {
-    pin.el.addEventListener("click", () => onPinClick(pin.id));
-  }
 
   const offs = [engine.events.on("entity:click", onEntityClick)];
   const onKey = (ev: KeyboardEvent): void => {
@@ -367,15 +199,11 @@ export function registerStory(engine: ScrollEnginePublic): () => void {
   if (typeof document !== "undefined") document.addEventListener("keydown", onKey);
 
   const onUnload = (): void => {
-    if (pinRaf && typeof cancelAnimationFrame === "function") cancelAnimationFrame(pinRaf);
-    pinRaf = 0;
     if (typeof document !== "undefined") document.removeEventListener("keydown", onKey);
     ferry.dispose();
     bridge.dispose();
     atmosphere.dispose();
-    street.dispose();
     closePanel();
-    for (const pin of pins) pin.el.remove();
     if (typeof document !== "undefined") document.getElementById(STYLE_ID)?.remove();
     offs.forEach((off) => off());
   };
@@ -402,25 +230,4 @@ function ensureStyles(): void {
   style.id = STYLE_ID;
   style.textContent = STORY_CSS;
   document.head.appendChild(style);
-}
-
-function mountPins(engine: ScrollEnginePublic): { id: string; x: number; y: number; el: HTMLButtonElement }[] {
-  const ui = engine.getUiLayer();
-  if (!ui || typeof document === "undefined") return [];
-  const pins: { id: string; x: number; y: number; el: HTMLButtonElement }[] = [];
-  for (const entity of scene.entities) {
-    if (entity.type !== "hotspot") continue;
-    const shape = entity.shape;
-    if (!shape) continue;
-    const cx = entity.x + (shape.kind === "rect" ? shape.w / 2 : 0);
-    const cy = entity.y + (shape.kind === "rect" ? shape.h / 2 : 0);
-    const el = document.createElement("button");
-    el.type = "button";
-    el.className = "qingming-pin";
-    const key = entity.i18nKey ? `${entity.i18nKey}.title` : entity.id;
-    el.textContent = copy[key] ?? entity.id;
-    ui.appendChild(el);
-    pins.push({ id: entity.id, x: cx, y: cy, el });
-  }
-  return pins;
 }

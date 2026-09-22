@@ -69,6 +69,9 @@ export class TriggerRuntime {
   onChapterArrive(payload: unknown): void {
     const id = readId(payload, "id");
     if (!id) return;
+    if (payload && typeof payload === "object" && "completed" in payload && (payload as { completed?: unknown }).completed === false) {
+      return;
+    }
     for (const trigger of this.triggers) {
       if (trigger.when.type === "chapter:enter" && trigger.when.chapterId === id) this.fire(trigger);
     }

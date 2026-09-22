@@ -1,9 +1,11 @@
-import { Application } from "pixi.js";
-import type { RendererAdapter, ViewportState, VisibleTile } from "@handscroll/core";
-import type { ActorSnapshot } from "@handscroll/core";
+import { Application, ColorMatrixFilter } from "pixi.js";
+import type { ActorSnapshot, RendererAdapter, TileGrade, UnderlayBand, ViewportState, VisibleTile } from "@handscroll/core";
 import { createWorldRoot } from "./WorldRoot.ts";
 import { TileLayer } from "./TileLayer.ts";
 import { ActorLayer } from "./ActorLayer.ts";
+import { UnderlayLayer } from "./UnderlayLayer.ts";
+import { applyTileGrade } from "./tileGrade.ts";
+import { attachWorldLayers } from "./worldLayers.ts";
 
 export function createPixiRenderer(): RendererAdapter {
   return new PixiRenderer();
@@ -15,7 +17,10 @@ class PixiRenderer implements RendererAdapter {
   private canvas: HTMLCanvasElement | null = null;
   private world = createWorldRoot();
   private tiles: TileLayer | null = null;
+  private underlay: UnderlayLayer | null = null;
   private actors: ActorLayer | null = null;
+  private readonly tileFilter = new ColorMatrixFilter();
+  private readonly actorFilter = new ColorMatrixFilter();
   private width = 1;
   private height = 1;
   private dpr = 1;
@@ -44,8 +49,10 @@ class PixiRenderer implements RendererAdapter {
     });
     this.app = app;
     app.stage.addChild(this.world);
-    this.tiles = new TileLayer(this.world);
-    this.actors = new ActorLayer(this.world);
+    const layers = attachWorldLayers(this.world);
+    this.tiles = layers.tiles;
+    this.underlay = layers.underlay;
+    this.actors = layers.actors;
     return canvas;
   }
 
@@ -75,6 +82,18 @@ class PixiRenderer implements RendererAdapter {
     this.actors?.setActors(actors);
   }
 
+  setTileGrade(grade: TileGrade): void {
+    if (!this.tiles || !this.actors) return;
+    applyTileGrade(this.tiles.container, this.actors.container, grade, {
+      tiles: this.tileFilter,
+      actors: this.actorFilter,
+    });
+  }
+
+  setUnderlay(bands: readonly UnderlayBand[] | null): void {
+    this.underlay?.setBands(bands);
+  }
+
   render(): void {
     this.app?.render();
   }
@@ -82,6 +101,8 @@ class PixiRenderer implements RendererAdapter {
   destroy(): void {
     this.tiles?.clear();
     this.tiles = null;
+    this.underlay?.clear();
+    this.underlay = null;
     this.actors?.clear();
     this.actors = null;
     this.app?.destroy();

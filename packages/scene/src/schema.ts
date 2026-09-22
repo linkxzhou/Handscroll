@@ -119,11 +119,14 @@ const ActorSchema = z.object({
       text: z.string().optional(),
       cycleKeys: z.array(z.string()).optional(),
       cycleSeconds: z.number().positive().optional(),
+      cycleOffset: z.number().nonnegative().optional(),
     })
     .optional(),
   interactionPriority: z.number().optional(),
   cull: z.boolean().default(true),
   scaleTrack: z.array(z.object({ distance: z.number(), value: z.number() })).optional(),
+  tint: z.number().int().nonnegative().max(0xffffff).optional(),
+  alpha: z.number().min(0).max(1).optional(),
 });
 
 const ZoneSchema = z.object({
@@ -146,6 +149,11 @@ const SpawnSchema = z.object({
   seed: z.number().int(),
   width: z.number().positive(),
   height: z.number().positive(),
+  tint: z.number().int().nonnegative().max(0xffffff).optional(),
+  zIndex: z.number().optional(),
+  frameSeconds: z.number().positive().optional(),
+  anchorX: z.number().min(0).max(1).optional(),
+  anchorY: z.number().min(0).max(1).optional(),
 });
 
 const DialogueStubSchema = z.object({

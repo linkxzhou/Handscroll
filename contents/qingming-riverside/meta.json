@@ -10,16 +10,32 @@
     "centerY": 362,
     "zoom": 0.9
   },
-  "plugins": ["quality", "guide", "audio", "weather", "water"],
+  "plugins": ["quality", "guide", "audio", "weather", "water", "atmosphere", "crowd", "vessel"],
   "pluginConfig": {
     "quality": { "default": "auto" },
     "guide": { "showChapterDots": true },
     "audio": { "defaultMuted": true },
+    "atmosphere": { "gradeActors": false },
+    "crowd": {
+      "enabled": true,
+      "text": {
+        "shop.teahouse": "茶肆",
+        "shop.teahouseBusy": "客满",
+        "shop.teahousePour": "斟茶",
+        "shop.bridge": "桥头摊",
+        "shop.bridgeFruit": "卖果",
+        "shop.gate": "货摊",
+        "shop.gateGrain": "籴米"
+      }
+    },
+    "vessel": { "enabled": true },
     "water": {
       "enabled": true,
+      "composite": "pixi-underlay",
       "bands": [{ "x": 0, "y": 520, "w": 6516, "h": 204 }]
     }
   },
+  "world": { "activeMargin": 320 },
   "storyEntry": "./story/index.ts",
   "license": {
     "assets": "Derived from xianxie6/qingming-riverside original generated art; not Song-dynasty original painting scans. See raw/README.md.",

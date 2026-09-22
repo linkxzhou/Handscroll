@@ -98,6 +98,41 @@ describe("water plugin", () => {
     expect(infos.some((m) => m.includes("stub"))).toBe(false);
   });
 
+  it("draws a pixi underlay without calling ensureThree", async () => {
+    let threeCalls = 0;
+    const underlays: unknown[] = [];
+    const plugin = createWaterPlugin({
+      enabled: true,
+      composite: "pixi-underlay",
+      bands: [{ x: 0, y: 520, w: 100, h: 40 }],
+    });
+    const ctx = stubCtx({
+      ensureThree: async () => {
+        threeCalls += 1;
+        return null;
+      },
+    });
+    ctx.engine.setUnderlay = (bands) => {
+      underlays.push(bands);
+    };
+    await plugin.onRegister?.(ctx);
+    await plugin.onSceneLoad?.({
+      version: 1,
+      meta: { id: "x", width: 1, height: 1 },
+      background: { manifestUrl: "./tiles/manifest.json" },
+      entities: [],
+      chapters: [],
+    });
+    plugin.onFrame?.(0.016, vp);
+    expect(threeCalls).toBe(0);
+    expect(underlays.length).toBeGreaterThan(0);
+    const latest = underlays.at(-1) as { x: number; y: number; w: number; h: number }[];
+    expect(latest[0]).toMatchObject({ x: 0, y: 520, w: 100, h: 40 });
+    expect(ctx.continuous.has(WATER_CONTINUOUS_REASON)).toBe(true);
+    await plugin.onDestroy?.();
+    expect(ctx.continuous.has(WATER_CONTINUOUS_REASON)).toBe(false);
+  });
+
   it("falls back without throwing when ensureThree returns null", async () => {
     const plugin = createWaterPlugin({
       enabled: true,

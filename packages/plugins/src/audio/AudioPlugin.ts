@@ -9,6 +9,12 @@ export type AmbientKind = "rain" | "water" | "none";
 interface PlayPayload {
   id?: string;
   kind?: AmbientKind;
+  url?: string;
+}
+
+interface WantedClip {
+  kind: AmbientKind;
+  url?: string;
 }
 
 const nodes = () => new Map<string, { stop: () => void }>();
@@ -20,7 +26,7 @@ export const createAudioPlugin: PluginFactory = (raw): ScrollPlugin => {
   let audioCtx: AudioContext | null = null;
   let ctx: EngineContext | null = null;
   const playing = nodes();
-  const wanted = new Map<string, AmbientKind>();
+  const wanted = new Map<string, WantedClip>();
   const offs: Array<() => void> = [];
 
   const unlock = (): void => {
@@ -41,18 +47,34 @@ export const createAudioPlugin: PluginFactory = (raw): ScrollPlugin => {
     playing.delete(id);
   };
 
-  const startKind = (id: string, kind: AmbientKind): void => {
+  const startClip = (id: string, clip: WantedClip): void => {
     stopId(id);
-    if (kind === "none") return;
+    if (clip.url && typeof Audio !== "undefined") {
+      try {
+        const audio = new Audio(clip.url);
+        audio.loop = true;
+        void audio.play();
+        playing.set(id, {
+          stop() {
+            audio.pause();
+            audio.src = "";
+          },
+        });
+        return;
+      } catch {
+        /* fall through to procedural noise when a url cannot play */
+      }
+    }
+    if (clip.kind === "none") return;
     const ac = ensureContext();
     if (!ac) return;
-    const handle = kind === "rain" ? startNoise(ac, { hp: 800, lp: 4200, gain: 0.04 }) : startNoise(ac, { hp: 80, lp: 480, gain: 0.03 });
+    const handle = clip.kind === "rain" ? startNoise(ac, { hp: 800, lp: 4200, gain: 0.04 }) : startNoise(ac, { hp: 80, lp: 480, gain: 0.03 });
     if (handle) playing.set(id, handle);
   };
 
   const startWanted = (): void => {
     if (muted || !unlocked) return;
-    for (const [id, kind] of wanted) startKind(id, kind);
+    for (const [id, clip] of wanted) startClip(id, clip);
   };
 
   const stopAll = (): void => {
@@ -84,8 +106,9 @@ export const createAudioPlugin: PluginFactory = (raw): ScrollPlugin => {
         next.engine.events.on("audio:play", (payload) => {
           const parsed = parsePlay(payload);
           if (!parsed) return;
-          wanted.set(parsed.id, parsed.kind);
-          startKind(parsed.id, parsed.kind);
+          const clip = { kind: parsed.kind, url: parsed.url };
+          wanted.set(parsed.id, clip);
+          startClip(parsed.id, clip);
         }),
       );
       offs.push(
@@ -133,13 +156,14 @@ function parseId(payload: unknown): string | null {
   return null;
 }
 
-function parsePlay(payload: unknown): { id: string; kind: AmbientKind } | null {
+export function parsePlay(payload: unknown): { id: string; kind: AmbientKind; url?: string } | null {
   if (!payload || typeof payload !== "object") return null;
   const id = parseId(payload);
   if (!id) return null;
   const kind = (payload as PlayPayload).kind ?? "none";
   if (kind !== "rain" && kind !== "water" && kind !== "none") return null;
-  return { id, kind };
+  const url = (payload as PlayPayload).url;
+  return { id, kind, url: typeof url === "string" && url.length > 0 ? url : undefined };
 }
 
 function parseMuted(payload: unknown, fallback: boolean): boolean {

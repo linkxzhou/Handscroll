@@ -91,6 +91,62 @@ describe("weather plugin", () => {
     expect(ctx.continuous.has(WEATHER_CONTINUOUS_REASON)).toBe(false);
   });
 
+  it("removes the weather node when the scene unloads (G-I-02)", async () => {
+    class El {
+      className = "";
+      id = "";
+      textContent = "";
+      dataset: Record<string, string> = {};
+      parent: El | null = null;
+      children: El[] = [];
+      setAttribute(): void {}
+      appendChild(child: El): El {
+        child.parent = this;
+        this.children.push(child);
+        return child;
+      }
+      remove(): void {
+        if (!this.parent) return;
+        this.parent.children = this.parent.children.filter((child) => child !== this);
+        this.parent = null;
+      }
+    }
+    const ui = new El();
+    const previous = globalThis.document;
+    const byId = new Map<string, El>();
+    globalThis.document = {
+      createElement: () => new El(),
+      getElementById: (id: string) => byId.get(id) ?? null,
+      head: {
+        appendChild(node: El) {
+          if (node.id) byId.set(node.id, node);
+          return node;
+        },
+      },
+    } as unknown as Document;
+    try {
+      const plugin = createWeatherPlugin({});
+      const ctx = stubCtx();
+      ctx.engine.getUiLayer = () => ui as unknown as HTMLElement;
+      await plugin.onRegister?.(ctx);
+      await plugin.onSceneLoad?.({
+        version: 1,
+        meta: { id: "x", width: 1, height: 1 },
+        background: { manifestUrl: "./tiles/manifest.json" },
+        entities: [],
+        chapters: [],
+      });
+      setWeather(ctx.engine.events, "rain");
+      expect(ui.children.some((child) => child.className === "hs-weather")).toBe(true);
+      await plugin.onSceneUnload?.();
+      expect(ui.children.some((child) => child.className === "hs-weather")).toBe(false);
+      await plugin.onDestroy?.();
+    } finally {
+      if (previous === undefined) Reflect.deleteProperty(globalThis, "document");
+      else globalThis.document = previous;
+    }
+  });
+
   it("ignores unknown weather ids", async () => {
     const plugin = createWeatherPlugin({});
     const ctx = stubCtx();

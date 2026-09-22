@@ -1,43 +1,32 @@
 import { describe, expect, it } from "vitest";
-import type { SchedulerLike, ViewportState } from "@handscroll/core";
+import { EventBus } from "@handscroll/core";
+import type { SchedulerLike } from "@handscroll/core";
 import {
   CROSSING_SECONDS,
-  FERRY_CONTINUOUS_REASON,
+  FERRY_ACTOR_ID,
+  FERRY_PATH_ID,
   createFerryController,
   dockIdToBerth,
   oppositeBerth,
+  planCrossing,
 } from "./ferry.ts";
-import { BERTHS } from "../coords.ts";
+import { scenePathLength } from "../paths.ts";
 
 function mockEngine() {
-  const continuous = new Set<string>();
+  const events = new EventBus();
   const frames: number[] = [];
   const scheduler: SchedulerLike = {
     requestFrame: () => {
       frames.push(1);
     },
-    wake: () => {
-      frames.push(1);
-    },
-    requestContinuous: (reason: string) => {
-      continuous.add(reason);
-    },
-    releaseContinuous: (reason: string) => {
-      continuous.delete(reason);
-    },
+    wake: () => {},
+    requestContinuous: () => {},
+    releaseContinuous: () => {},
   };
-  const viewport: ViewportState = { centerX: 3258, centerY: 362, zoom: 1, screenWidth: 1280, screenHeight: 720 };
-  return {
-    scheduler,
-    continuous,
-    frames,
-    getViewport: () => viewport,
-    getUiLayer: () => ({ appendChild: (n: unknown) => n }) as HTMLElement,
-    getScrollId: () => "qingming-riverside",
-  };
+  return { events, scheduler, frames };
 }
 
-describe("qingming ferry Q-C-01", () => {
+describe("qingming ferry", () => {
   it("maps dock entity ids to berths", () => {
     expect(dockIdToBerth("dock-west")).toBe("west");
     expect(dockIdToBerth("dock-east")).toBe("east");
@@ -45,47 +34,51 @@ describe("qingming ferry Q-C-01", () => {
     expect(oppositeBerth("east")).toBe("west");
   });
 
-  it("crosses from the idle east berth to the west dock", () => {
-    const engine = mockEngine();
-    const ferry = createFerryController(engine, { autoTick: false });
-    expect(ferry.getState().berth).toBe("east");
-    expect(ferry.getState().x).toBe(BERTHS.east.x);
-    expect(ferry.summon("dock-west")).toBe(true);
-    expect(engine.continuous.has(FERRY_CONTINUOUS_REASON)).toBe(true);
-    expect(ferry.getState().mode).toBe("crossing");
+  it("plans a crossing from the east berth toward the west dock", () => {
+    const length = scenePathLength(FERRY_PATH_ID);
+    const plan = planCrossing("east", "west", length);
+    expect(plan.destination).toBe("west");
+    expect(plan.fromDistance).toBeCloseTo(length);
+    expect(plan.toDistance).toBe(0);
+    expect(plan.speed).toBeCloseTo(length / CROSSING_SECONDS);
+    expect(planCrossing("east", "east", length).destination).toBe("west");
+  });
 
-    let guard = 0;
-    while (ferry.getState().mode !== "idle" && guard++ < 400) {
-      ferry.step(CROSSING_SECONDS / 20);
-    }
+  it("emits one vessel summon and completes on arrival", () => {
+    const engine = mockEngine();
+    const summons: unknown[] = [];
+    engine.events.on("vessel:summon", (payload) => summons.push(payload));
+    const ferry = createFerryController(engine);
+    expect(ferry.getState().berth).toBe("east");
+    expect(ferry.summon("dock-west")).toBe(true);
+    expect(ferry.getState().mode).toBe("crossing");
+    expect(summons).toHaveLength(1);
+    expect(ferry.summon("dock-east")).toBe(false);
+
+    engine.events.emit("vessel:arrived", { actorId: FERRY_ACTOR_ID, pathId: FERRY_PATH_ID });
     expect(ferry.getState().mode).toBe("idle");
     expect(ferry.getState().berth).toBe("west");
-    expect(ferry.getState().x).toBeCloseTo(BERTHS.west.x, 5);
-    expect(engine.continuous.has(FERRY_CONTINUOUS_REASON)).toBe(false);
     ferry.dispose();
   });
 
-  it("clicking the current dock starts a crossing to the opposite shore", () => {
+  it("accepts dock:request from a zone-style trigger payload", () => {
     const engine = mockEngine();
-    const ferry = createFerryController(engine, { autoTick: false });
-    expect(ferry.summon("dock-east")).toBe(true);
+    const ferry = createFerryController(engine);
+    engine.events.emit("dock:request", { berth: "west" });
+    expect(ferry.getState().mode).toBe("crossing");
     expect(ferry.getState().destination).toBe("west");
     ferry.dispose();
   });
 
-  it("dispose is idempotent and stops further motion (Q-C-01 / Q-C-02)", () => {
+  it("dispose is idempotent and ignores later summons", () => {
     const engine = mockEngine();
-    const ferry = createFerryController(engine, { autoTick: false });
+    const ferry = createFerryController(engine);
     ferry.summon("dock-west");
-    ferry.step(0.5);
-    const xMid = ferry.getState().x;
-    expect(xMid).not.toBe(BERTHS.east.x);
     ferry.dispose();
     ferry.dispose();
     expect(ferry.getState().disposed).toBe(true);
-    expect(engine.continuous.has(FERRY_CONTINUOUS_REASON)).toBe(false);
-    ferry.step(1);
-    expect(ferry.getState().x).toBe(xMid);
     expect(ferry.summon("dock-east")).toBe(false);
+    engine.events.emit("dock:request", { berth: "east" });
+    expect(ferry.getState().mode).toBe("idle");
   });
 });
