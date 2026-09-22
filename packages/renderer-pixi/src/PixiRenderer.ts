@@ -1,7 +1,9 @@
 import { Application } from "pixi.js";
 import type { RendererAdapter, ViewportState, VisibleTile } from "@handscroll/core";
+import type { ActorSnapshot } from "@handscroll/core";
 import { createWorldRoot } from "./WorldRoot.ts";
 import { TileLayer } from "./TileLayer.ts";
+import { ActorLayer } from "./ActorLayer.ts";
 
 export function createPixiRenderer(): RendererAdapter {
   return new PixiRenderer();
@@ -13,6 +15,7 @@ class PixiRenderer implements RendererAdapter {
   private canvas: HTMLCanvasElement | null = null;
   private world = createWorldRoot();
   private tiles: TileLayer | null = null;
+  private actors: ActorLayer | null = null;
   private width = 1;
   private height = 1;
   private dpr = 1;
@@ -42,6 +45,7 @@ class PixiRenderer implements RendererAdapter {
     this.app = app;
     app.stage.addChild(this.world);
     this.tiles = new TileLayer(this.world);
+    this.actors = new ActorLayer(this.world);
     return canvas;
   }
 
@@ -67,6 +71,10 @@ class PixiRenderer implements RendererAdapter {
     this.tiles?.sync(tiles);
   }
 
+  setActors(actors: readonly ActorSnapshot[]): void {
+    this.actors?.setActors(actors);
+  }
+
   render(): void {
     this.app?.render();
   }
@@ -74,6 +82,8 @@ class PixiRenderer implements RendererAdapter {
   destroy(): void {
     this.tiles?.clear();
     this.tiles = null;
+    this.actors?.clear();
+    this.actors = null;
     this.app?.destroy();
     this.app = null;
     this.canvas?.remove();

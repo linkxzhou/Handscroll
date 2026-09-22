@@ -1,6 +1,9 @@
 import type { SceneMeta, ViewportState, FlyToOptions } from "./viewport.ts";
 import type { PluginFactory } from "./plugin.ts";
 import type { HitResult } from "./hit.ts";
+import type { AabbItem } from "./spatial.ts";
+import type { ActorSnapshot, DialogueStub, PathDef, SpawnDef, WorldSystem, ZoneDef, ActorDef } from "./world.ts";
+import type { TriggerDef } from "./trigger.ts";
 
 export type QualityLevel = "auto" | "low" | "medium" | "high";
 export type SchedulerMode = "continuous" | "on-demand";
@@ -40,6 +43,8 @@ export interface ContentMeta extends SceneMeta {
   pluginConfig?: Record<string, unknown>;
   defaultViewport?: Pick<ViewportState, "centerX" | "centerY" | "zoom">;
   storyEntry?: string;
+  /** Optional world-sim overrides. Absent means engine defaults. */
+  world?: { activeMargin?: number };
 }
 
 export interface ChapterBookmark {
@@ -97,15 +102,20 @@ export interface Model3dEntity extends SceneEntityBase {
 
 export interface SceneDocument {
   /**
-   * `1` is the published v1 shape.
-   * `2` is that shape plus deferred world arrays (ADR 0004). Phase 0 accepts
-   * both; it does not interpret array elements.
+   * `1` is the published v1 shape (world arrays stripped).
+   * `2` is that shape plus paths, actors, zones, spawns, dialogues, and triggers.
    */
   version: 1 | 2;
   meta: SceneMeta;
   background: { manifestUrl: string };
   entities: SceneEntity[];
   chapters: ChapterBookmark[];
+  paths?: PathDef[];
+  actors?: ActorDef[];
+  zones?: ZoneDef[];
+  spawns?: SpawnDef[];
+  dialogues?: DialogueStub[];
+  triggers?: TriggerDef[];
 }
 
 export interface StoryModule {
@@ -139,6 +149,8 @@ export interface RendererAdapter {
   setSize(width: number, height: number, dpr: number): void;
   sync(viewport: ViewportState): void;
   setTiles?(tiles: readonly VisibleTile[]): void;
+  /** World actors in world coordinates. Omitted by adapters that predate Phase 1. */
+  setActors?(actors: readonly ActorSnapshot[]): void;
   needsThree?(): boolean;
   ensureLoaded?(): Promise<void>;
   attachOverlay?(object: unknown): void;
@@ -169,6 +181,8 @@ export interface ViewportControllerLike {
   getState(): ViewportState;
   flyTo(opts: FlyToOptions): void;
   interruptTransition(): void;
+  /** True during flyTo or leftover pan inertia. Optional so older test doubles still typecheck. */
+  isAnimating?(): boolean;
 }
 
 export interface SchedulerLike {
@@ -213,6 +227,8 @@ export interface AssetSystem {
 
 export interface InteractionSystem {
   setEntities(entities: readonly SceneEntity[]): void;
+  /** Replace this frame's moving AABBs. Static hotspots stay loaded. */
+  sync(items: readonly AabbItem[]): void;
   pickAll(worldX: number, worldY: number): HitResult[];
 }
 
@@ -226,4 +242,5 @@ export interface EngineServices {
   tiles: TileSystem;
   interaction: InteractionSystem;
   animation: AnimationSystem;
+  world: WorldSystem;
 }

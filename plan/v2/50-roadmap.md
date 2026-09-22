@@ -10,7 +10,7 @@
 | Phase | 名称 | 状态 | 完成日期 | PR |
 |---|---|---|---|---|
 | 0 | 冻结 v1 表面 + 版本政策 | 已完成 | 2026-09-22 | https://github.com/linkxzhou/Handscroll/pull/9 |
-| 1 | 世界实体 + 路径跟随 + scene v2 | 未开始 | — | — |
+| 1 | 世界实体 + 路径跟随 + scene v2 | 已完成 | 2026-09-22 | https://github.com/linkxzhou/Handscroll/pull/10 |
 | 2 | crowd / vessel / atmosphere + 街市离开 DOM | 未开始 | — | — |
 | 3 | 非清明上河图类型的第二包 | 未开始 | — | — |
 | 4 | 作者打磨 / 轻量拾取 | 未开始 | — | — |

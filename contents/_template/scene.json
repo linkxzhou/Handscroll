@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "meta": {
     "id": "untitled-scroll",
     "width": 4096,
@@ -9,5 +9,11 @@
     "manifestUrl": "./tiles/manifest.json"
   },
   "entities": [],
-  "chapters": []
+  "chapters": [],
+  "paths": [],
+  "actors": [],
+  "zones": [],
+  "spawns": [],
+  "dialogues": [],
+  "triggers": []
 }

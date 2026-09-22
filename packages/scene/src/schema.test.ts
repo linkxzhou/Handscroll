@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MetaSchema, SceneSchema } from "./schema.ts";
+import { MetaSchema, SceneSchema, toSceneV2 } from "./schema.ts";
 
 describe("schemas B-U-01/02", () => {
   it("rejects meta without license.assets (B-U-01)", () => {
@@ -50,13 +50,64 @@ describe("schemas B-U-01/02", () => {
     expect(result.data.entities).toEqual(baseScene(2).entities);
   });
 
-  it("preserves version 2 array elements without interpreting them", () => {
-    const paths = [{ id: "road", points: [{ x: 1, y: 2 }] }];
-    const result = SceneSchema.safeParse({ ...baseScene(2), paths });
+  it("keeps a valid version 2 path and applies actor defaults", () => {
+    const paths = [{ id: "road", points: [{ x: 1, y: 2 }, { x: 4, y: 2 }] }];
+    const result = SceneSchema.safeParse({
+      ...baseScene(2),
+      paths,
+      actors: [{ id: "walker", kind: "sprite", x: 1, y: 2, width: 8, height: 12 }],
+    });
     expect(result.success).toBe(true);
     if (!result.success || result.data.version !== 2) return;
     expect(result.data.paths).toEqual(paths);
-    expect(result.data.actors).toEqual([]);
+    expect(result.data.actors[0]).toMatchObject({
+      id: "walker",
+      anchorX: 0.5,
+      anchorY: 1,
+      cull: true,
+      zIndex: 0,
+    });
+  });
+
+  it("rejects a path with fewer than two points and a spawn over the count cap", () => {
+    expect(
+      SceneSchema.safeParse({ ...baseScene(2), paths: [{ id: "road", points: [{ x: 1, y: 2 }] }] }).success,
+    ).toBe(false);
+    expect(
+      SceneSchema.safeParse({
+        ...baseScene(2),
+        spawns: [
+          {
+            id: "crowd",
+            pathId: "road",
+            count: 65,
+            speedMin: 1,
+            speedMax: 2,
+            atlas: "./atlas/a.webp",
+            frames: ["a"],
+            seed: 1,
+            width: 8,
+            height: 8,
+          },
+        ],
+      }).success,
+    ).toBe(false);
+  });
+
+  it("toSceneV2 keeps v1 hotspots and adds empty world arrays (W-U-03)", () => {
+    const parsed = SceneSchema.parse(baseScene(1));
+    const v2 = toSceneV2(parsed);
+    expect(v2.version).toBe(2);
+    expect(v2.entities).toEqual(baseScene(1).entities);
+    expect(v2.paths).toEqual([]);
+    expect(v2.actors).toEqual([]);
+    expect(v2.zones).toEqual([]);
+    expect(v2.spawns).toEqual([]);
+    expect(v2.dialogues).toEqual([]);
+    expect(v2.triggers).toEqual([]);
+    const again = toSceneV2(v2);
+    expect(again.entities[0]?.id).toBe("mark");
+    expect(again.actors).toEqual([]);
   });
 
   it("rejects version 2 when a world array is not an array", () => {

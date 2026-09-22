@@ -1,0 +1,22 @@
+{
+  "id": "path-walker",
+  "title": "Path walker",
+  "era": "synthetic",
+  "description": "Phase 1 fixture: one sprite that walks a path in the Pixi world. Placeholder art, not a historical painting.",
+  "width": 800,
+  "height": 400,
+  "defaultViewport": {
+    "centerX": 400,
+    "centerY": 200,
+    "zoom": 1
+  },
+  "plugins": ["quality"],
+  "pluginConfig": {
+    "quality": { "default": "auto" }
+  },
+  "license": {
+    "code": "CC0-1.0",
+    "assets": "Procedural placeholder sprite. Not a historical painting.",
+    "notes": "Engine fixture for path following. Safe to replace."
+  }
+}

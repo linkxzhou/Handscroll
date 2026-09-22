@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /**
- * Architecture gate: @handscroll/core must not import pixi.js or three.
+ * Architecture gate: @handscroll/core and @handscroll/world must not import pixi.js or three.
  */
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const coreDir = path.join(root, "packages", "core");
+const packageDirs = ["core", "world"].map((name) => path.join(root, "packages", name));
 const banned = /\bfrom\s+['"](pixi\.js|three)['"]|\bimport\s+['"](pixi\.js|three)['"]|\brequire\(['"](pixi\.js|three)['"]\)/;
 
 const offenders = [];
@@ -25,12 +25,14 @@ function walk(dir) {
   }
 }
 
-walk(coreDir);
+for (const dir of packageDirs) {
+  if (fs.existsSync(dir)) walk(dir);
+}
 
 if (offenders.length) {
-  console.error("packages/core must not import pixi.js or three:");
+  console.error("packages/core and packages/world must not import pixi.js or three:");
   for (const f of offenders) console.error(`  - ${f}`);
   process.exit(1);
 }
 
-console.log("test:dep OK — packages/core has no pixi.js / three imports");
+console.log("test:dep OK — packages/core and packages/world have no pixi.js / three imports");

@@ -23,5 +23,6 @@ Shipped packs:
 
 - `qingming-riverside` — stitched riverside street with ferry, 虹桥过船, 时雨/夜景/水面, and a modest street-life overlay; `yarn dev` → `/?scroll=qingming-riverside`
 - `demo-scroll` — synthetic engine-acceptance painting (tech demo card on the gallery)
+- `path-walker` — version 2 fixture: one Pixi sprite walking a path (`/?scroll=path-walker`)
 
 See `plan/30-business-layer.md` for schemas and `plan/01-engine-implementation.md` for the workflow.

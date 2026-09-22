@@ -1,0 +1,10 @@
+{
+  "width": 800,
+  "height": 400,
+  "tileSize": 256,
+  "format": "webp",
+  "levels": [
+    { "id": "0", "scale": 1 }
+  ],
+  "tileUrl": "{level}/{x}_{y}.webp"
+}

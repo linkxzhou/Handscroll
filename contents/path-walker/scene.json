@@ -1,0 +1,69 @@
+{
+  "version": 2,
+  "meta": {
+    "id": "path-walker",
+    "width": 800,
+    "height": 400
+  },
+  "background": {
+    "manifestUrl": "./tiles/manifest.json"
+  },
+  "entities": [],
+  "chapters": [
+    {
+      "id": "start",
+      "title": "Lane",
+      "centerX": 400,
+      "centerY": 200,
+      "zoom": 1
+    }
+  ],
+  "paths": [
+    {
+      "id": "lane",
+      "points": [
+        { "x": 80, "y": 240 },
+        { "x": 400, "y": 160 },
+        { "x": 720, "y": 240 }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "id": "walker",
+      "kind": "sprite",
+      "x": 80,
+      "y": 240,
+      "zIndex": 2,
+      "width": 36,
+      "height": 48,
+      "anchorX": 0.5,
+      "anchorY": 1,
+      "imageUrl": "./atlas/walker.png",
+      "pathId": "lane",
+      "speed": 80,
+      "follow": "loop",
+      "distance": 0,
+      "label": { "text": "walker" },
+      "interactionPriority": 1
+    }
+  ],
+  "zones": [
+    {
+      "id": "mid",
+      "x": 360,
+      "y": 120,
+      "shape": { "kind": "rect", "w": 80, "h": 80 }
+    }
+  ],
+  "spawns": [],
+  "dialogues": [],
+  "triggers": [
+    {
+      "id": "reach-mid",
+      "when": { "type": "zone:enter", "zoneId": "mid", "subject": "camera" },
+      "emit": "fixture:entered",
+      "once": true
+    }
+  ]
+}

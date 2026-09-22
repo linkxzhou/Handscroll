@@ -1,8 +1,8 @@
 # Handscroll 引擎计划 v2.0 — 总览
 
-> **实施状态：** Phase 0 已完成 · Phase 1+ 未开始
+> **实施状态：** Phase 1 已完成 · Phase 2+ 未开始
 
-> 状态：有效计划（Phase 0 已落地版本门与冻结表面；Phase 1 起尚未实现）  
+> 状态：有效计划（Phase 0 版本门与 Phase 1 世界运行时已落地；Phase 2 起尚未实现）  
 > 基线：v1 baseline（shipped 2026-09），见 [../README.md](../README.md)  
 > 本文不改运行时。实现时仍遵守：`packages/core` 不 import `pixi.js` / `three`，core 内不出现画名或实体 id。
 
