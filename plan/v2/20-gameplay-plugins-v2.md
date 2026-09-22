@@ -1,6 +1,6 @@
 # v2 玩法插件
 
-> **实施状态：** 待 Phase 2 · Phase 1 已完成
+> **实施状态：** Phase 2 已完成 · 2026-09-22 · https://github.com/linkxzhou/Handscroll/pull/11
 
 > 口诀不变：换一幅画还能用 → 插件；只有这一幅的文案和任务步骤 → `contents/<id>/story`。  
 > 插件 id、事件名、配置字段里不出现画名。

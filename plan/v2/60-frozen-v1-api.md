@@ -7,6 +7,7 @@ Phase 1 在这些 API **旁边**加了世界模拟与 `setActors`。改变下列
 ## 0. 变更说明
 
 - 2026-09-22 Phase 1：新增 `RendererAdapter.setActors`、`TimeService`、`TriggerRuntime`、`EngineServices.world`、`InteractionSystem.sync`。未改 `loadContent` 的卸载/装载顺序、`HitResult` 字段、`weather:set`、`camera.flyTo` 的毫秒时长与夹取、`requestContinuous` 的 reason 集合语义。镜头 `update` 仍用调度器墙钟，因此暂停时飞镜与惯性仍会结束。`guide` 在飞镜结束且镜头落到章节目标附近时额外发出 `chapter:arrive`。
+- 2026-09-22 Phase 2：旁边增加 `crowd` / `vessel` / `atmosphere`、`setTileGrade`、`setUnderlay`、`water.composite = "pixi-underlay"`、`audio:play` 的可选 `url`。`chapter:arrive` 在飞镜结束时总会发出，并带 `completed`；被打断时为 `false`，触发器不把它当成 `chapter:enter`。`qingming-riverside` 改为 scene version 2。`demo-scroll` 仍是 version 1。未改 `loadContent` 顺序、`HitResult`、`weather:set`、`camera.flyTo`。
 
 ADR [0003](./adr/0003-world-actors-pixi.md)、[0004](./adr/0004-scene-schema-versioning.md)、[0005](./adr/0005-occlusion-and-water-composite.md) 保持 **accepted**。本文件只把它们落到「现在不能悄悄改什么」。
 
@@ -46,10 +47,10 @@ ADR [0003](./adr/0003-world-actors-pixi.md)、[0004](./adr/0004-scene-schema-ver
 
 `SceneDocument.version` 的类型是 `1 | 2`。`loadScene` 不改写磁盘上的 version 1。世界系统调用 `toSceneV2` 后只走 version 2。
 
-现有浏览包 `demo-scroll`、`qingming-riverside` 保持 `version: 1`。脚手架与 `_template` 从 Phase 1 起写出 version 2 空数组。夹具包 `path-walker` 是 version 2。
+浏览包 `demo-scroll` 保持 `version: 1`。`qingming-riverside` 从 Phase 2 起是 `version: 2`（街市与船体进了 paths / actors / spawns）。脚手架与 `_template` 从 Phase 1 起写出 version 2 空数组。夹具包 `path-walker` 是 version 2。
 
 ## 3. 新包约束（ADR 0003、0005）
 
-- **新包不得增加 DOM 世界角色**（人、船、车、世界标签、世界标记、前景遮挡条）。禁止为世界物体每帧写 `style.left` / `style.top`。`.ui-layer` 只放 HUD。`contents/qingming-riverside/story/` 里的 DOM（含 `street-life.ts`）是遗留，**不要复制到新包**，本阶段也不删。
+- **新包不得增加 DOM 世界角色**（人、船、车、世界标签、世界标记、前景遮挡条）。禁止为世界物体每帧写 `style.left` / `style.top`。`.ui-layer` 只放 HUD。Phase 2 已删除清明上河图的世界 DOM（含 `street-life.ts`）。面板、过船按钮、氛围开关仍是 HUD。
 - **夜色与水面合成按 ADR 0005。** 夜色最终只乘瓦片层；有船体要压在水上的包用 `water.composite = "pixi-underlay"`，无船包可以继续 `three-overlay`。Phase 0 不实现这两种绘制。不要把船搬回 DOM 当作合成方案。
 - `packages/core` 不 import `pixi.js` / `three`，core 内不出现画名或内容包实体 id。`yarn test:dep` 继续守这条。
