@@ -113,4 +113,44 @@ describe("triggers W-U-05", () => {
     expect(emitted.filter((name) => name === "entity").length).toBe(3);
     expect(emitted.filter((name) => name === "arrive").length).toBe(2);
   });
+
+  it("plays and stops audio from zone crossings", () => {
+    const events = new EventBus();
+    const plays: unknown[] = [];
+    const stops: unknown[] = [];
+    events.on("audio:play", (payload) => plays.push(payload));
+    events.on("audio:stop", (payload) => stops.push(payload));
+    const runtime = new TriggerRuntime(events);
+    runtime.load([
+      {
+        id: "rain-in",
+        when: { type: "zone:enter", zoneId: "gate", subject: "camera" },
+        emit: "audio:play",
+        payload: { id: "rain", kind: "rain" },
+      },
+      {
+        id: "rain-out",
+        when: { type: "zone:exit", zoneId: "gate", subject: "camera" },
+        emit: "audio:stop",
+        payload: { id: "rain" },
+      },
+    ]);
+    runtime.update(sample(40, 40));
+    runtime.update(sample(5, 5));
+    expect(plays).toEqual([{ id: "rain", kind: "rain" }]);
+    runtime.update(sample(40, 40));
+    expect(stops).toEqual([{ id: "rain" }]);
+  });
+
+  it("does not open a chapter when the flight was interrupted", () => {
+    const events = new EventBus();
+    const opened: string[] = [];
+    events.on("chapter:open", () => opened.push("open"));
+    const runtime = new TriggerRuntime(events);
+    runtime.load([{ id: "ch", when: { type: "chapter:enter", chapterId: "gate" }, emit: "chapter:open" }]);
+    runtime.onChapterArrive({ id: "gate", completed: false });
+    expect(opened).toEqual([]);
+    runtime.onChapterArrive({ id: "gate", completed: true });
+    expect(opened).toEqual(["open"]);
+  });
 });

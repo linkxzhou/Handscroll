@@ -12,6 +12,9 @@ export type {
   FollowMode,
   PathDef,
   SpawnDef,
+  ArrivalNotice,
+  LabelTrack,
+  VesselSummonCommand,
   WorldLoadOptions,
   WorldScene,
   WorldSystem,
@@ -33,6 +36,8 @@ export type {
   RendererAdapter,
   RendererFactories,
   ThreeOverlayHost,
+  TileGrade,
+  UnderlayBand,
   ScrollEnginePublic,
   StoryModule,
   SchedulerLike,
@@ -50,3 +55,5 @@ export { InputManager } from "./input/InputManager.ts";
 export { GestureState, DRAG_THRESHOLD_PX } from "./input/GestureState.ts";
 export { RenderScheduler } from "./scheduler/RenderScheduler.ts";
 export { TimeService } from "./time/TimeService.ts";
+export { TriggerRuntime } from "./triggers/TriggerRuntime.ts";
+export type { TriggerSample } from "./triggers/TriggerRuntime.ts";

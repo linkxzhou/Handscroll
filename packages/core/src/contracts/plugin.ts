@@ -1,11 +1,14 @@
 import type { HitResult } from "./hit.ts";
 import type { SceneDocument, QualityLevel, ScrollEnginePublic } from "./engine.ts";
 import type { ViewportState } from "./viewport.ts";
+import type { WorldSystem } from "./world.ts";
 
 export interface EngineContext {
   engine: ScrollEnginePublic;
   scene: SceneDocument | null;
   quality: QualityLevel;
+  /** Present when the host injected a world simulator. Plugins no-op without it. */
+  world?: WorldSystem;
 }
 
 export interface ScrollPlugin {

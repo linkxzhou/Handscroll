@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "meta": {
     "id": "qingming-riverside",
     "width": 6516,
@@ -9,16 +9,6 @@
     "manifestUrl": "./tiles/manifest.json"
   },
   "entities": [
-    {
-      "id": "ferry-boat",
-      "type": "sprite",
-      "x": 4257,
-      "y": 556,
-      "zIndex": 20,
-      "url": "./atlas/boat.webp",
-      "width": 213,
-      "height": 64
-    },
     {
       "id": "hotspot-watermill",
       "type": "hotspot",
@@ -122,6 +112,240 @@
       "centerX": 5532,
       "centerY": 400,
       "zoom": 1.1
+    }
+  ],
+  "paths": [
+    {
+      "id": "street-teahouse",
+      "points": [
+        { "x": 2592, "y": 492 },
+        { "x": 2822, "y": 477 },
+        { "x": 3092, "y": 484 }
+      ]
+    },
+    {
+      "id": "street-bridge",
+      "points": [
+        { "x": 3552, "y": 452 },
+        { "x": 3674, "y": 414 },
+        { "x": 3852, "y": 450 }
+      ]
+    },
+    {
+      "id": "street-gate",
+      "points": [
+        { "x": 5352, "y": 502 },
+        { "x": 5532, "y": 477 },
+        { "x": 5732, "y": 492 }
+      ]
+    },
+    {
+      "id": "ferry-lane",
+      "points": [
+        { "x": 2802, "y": 556 },
+        { "x": 3530, "y": 576 },
+        { "x": 4257, "y": 556 }
+      ]
+    },
+    {
+      "id": "bridge-cargo",
+      "points": [
+        { "x": 3962, "y": 662 },
+        { "x": 3807, "y": 596 },
+        { "x": 3702, "y": 550 },
+        { "x": 3682, "y": 485 }
+      ]
+    }
+  ],
+  "actors": [
+    {
+      "id": "ferry",
+      "kind": "sprite",
+      "x": 4257,
+      "y": 556,
+      "zIndex": 4,
+      "width": 213,
+      "height": 64,
+      "anchorX": 0.5,
+      "anchorY": 0.83,
+      "imageUrl": "./atlas/boat.png",
+      "pathId": "ferry-lane",
+      "speed": 0,
+      "follow": "once",
+      "distance": 1455.5497
+    },
+    {
+      "id": "cargo",
+      "kind": "sprite",
+      "x": 3962,
+      "y": 662,
+      "zIndex": 5,
+      "width": 213,
+      "height": 64,
+      "anchorX": 0.5,
+      "anchorY": 0.83,
+      "imageUrl": "./atlas/boat.png",
+      "pathId": "bridge-cargo",
+      "speed": 0,
+      "follow": "once",
+      "distance": 0,
+      "scaleTrack": [
+        { "distance": 0, "value": 1.17 },
+        { "distance": 168.4666, "value": 1.17 },
+        { "distance": 283.1008, "value": 1.05 },
+        { "distance": 351.1082, "value": 0.42 }
+      ]
+    },
+    {
+      "id": "bridge-occluder",
+      "kind": "occluder",
+      "x": 3600,
+      "y": 360,
+      "zIndex": 12,
+      "width": 167,
+      "height": 90,
+      "anchorX": 0,
+      "anchorY": 0,
+      "tint": 5126696,
+      "alpha": 0
+    },
+    {
+      "id": "shop-teahouse",
+      "kind": "label",
+      "x": 2822,
+      "y": 444,
+      "zIndex": 8,
+      "width": 64,
+      "height": 22,
+      "anchorX": 0.5,
+      "anchorY": 1,
+      "label": {
+        "text": "茶肆",
+        "cycleKeys": ["shop.teahouse", "shop.teahouseBusy", "shop.teahousePour"],
+        "cycleSeconds": 2.8,
+        "cycleOffset": 0
+      }
+    },
+    {
+      "id": "shop-bridge",
+      "kind": "label",
+      "x": 3632,
+      "y": 458,
+      "zIndex": 8,
+      "width": 72,
+      "height": 22,
+      "anchorX": 0.5,
+      "anchorY": 1,
+      "label": {
+        "text": "桥头摊",
+        "cycleKeys": ["shop.bridge", "shop.bridgeFruit"],
+        "cycleSeconds": 2.8,
+        "cycleOffset": 0.6
+      }
+    },
+    {
+      "id": "shop-gate",
+      "kind": "label",
+      "x": 5492,
+      "y": 498,
+      "zIndex": 8,
+      "width": 64,
+      "height": 22,
+      "anchorX": 0.5,
+      "anchorY": 1,
+      "label": {
+        "text": "货摊",
+        "cycleKeys": ["shop.gate", "shop.gateGrain"],
+        "cycleSeconds": 2.8,
+        "cycleOffset": 1.2
+      }
+    },
+    {
+      "id": "label-dock-west",
+      "kind": "label",
+      "x": 2802,
+      "y": 520,
+      "zIndex": 8,
+      "width": 72,
+      "height": 18,
+      "anchorX": 0.5,
+      "anchorY": 1,
+      "label": { "text": "西岸码头" }
+    },
+    {
+      "id": "label-dock-east",
+      "kind": "label",
+      "x": 4257,
+      "y": 520,
+      "zIndex": 8,
+      "width": 72,
+      "height": 18,
+      "anchorX": 0.5,
+      "anchorY": 1,
+      "label": { "text": "东岸码头" }
+    }
+  ],
+  "zones": [],
+  "spawns": [
+    {
+      "id": "crowd-teahouse",
+      "pathId": "street-teahouse",
+      "count": 3,
+      "speedMin": 22,
+      "speedMax": 32,
+      "atlas": "./atlas/walker.png",
+      "frames": ["walk"],
+      "follow": "ping-pong",
+      "seed": 11,
+      "width": 22,
+      "height": 52,
+      "tint": 788743,
+      "zIndex": 6
+    },
+    {
+      "id": "crowd-bridge",
+      "pathId": "street-bridge",
+      "count": 3,
+      "speedMin": 18,
+      "speedMax": 26,
+      "atlas": "./atlas/walker.png",
+      "frames": ["walk"],
+      "follow": "ping-pong",
+      "seed": 22,
+      "width": 22,
+      "height": 52,
+      "tint": 788743,
+      "zIndex": 6
+    },
+    {
+      "id": "crowd-gate",
+      "pathId": "street-gate",
+      "count": 2,
+      "speedMin": 20,
+      "speedMax": 30,
+      "atlas": "./atlas/walker.png",
+      "frames": ["walk"],
+      "follow": "ping-pong",
+      "seed": 33,
+      "width": 22,
+      "height": 52,
+      "tint": 788743,
+      "zIndex": 6
+    }
+  ],
+  "dialogues": [],
+  "triggers": [
+    {
+      "id": "dock-west-request",
+      "when": { "type": "entity:click", "entityId": "dock-west" },
+      "emit": "dock:request",
+      "payload": { "berth": "west" }
+    },
+    {
+      "id": "dock-east-request",
+      "when": { "type": "entity:click", "entityId": "dock-east" },
+      "emit": "dock:request",
+      "payload": { "berth": "east" }
     }
   ]
 }

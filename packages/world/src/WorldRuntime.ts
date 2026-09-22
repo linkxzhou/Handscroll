@@ -1,11 +1,14 @@
-import { pointAlong, sampleTrack, stepFollower, type FollowerState, type PathDef as AnimPath } from "@handscroll/animation";
+import { pointAlong, polylineLength, sampleTrack, stepFollower, type FollowerState, type PathDef as AnimPath } from "@handscroll/animation";
 import type {
   AabbItem,
   ActorDef,
   ActorSnapshot,
+  ArrivalNotice,
   FollowMode,
+  LabelTrack,
   SceneDocument,
   SpawnDef,
+  VesselSummonCommand,
   ViewportState,
   WorldLoadOptions,
   WorldSystem,
@@ -38,37 +41,132 @@ interface SimActor {
   mode: FollowMode;
   direction: 1 | -1;
   finished: boolean;
+  paused: boolean;
+  /** Set by summon. Arrival fires once when distance reaches this value. */
+  goal: number | null;
+  arrivalQueued: boolean;
   label?: string;
+  labelKeys?: string[];
+  labelSeconds?: number;
+  labelOffset?: number;
   interactionPriority?: number;
   cullEnabled: boolean;
   cull: CullState;
   scaleTrack?: { distance: number; value: number }[];
   scale: number;
+  tint?: number;
+  alpha: number;
   order: number;
 }
 
+interface LoadedScene {
+  doc: SceneV2;
+  resolveUrl?: (relativePath: string) => string;
+}
+
+/**
+ * Spawns stay as scene data until `setSpawnsEnabled(true)` (the crowd plugin)
+ * or `load(..., { expandSpawns: true })`.
+ */
 export class WorldRuntime implements WorldSystem {
   private actors: SimActor[] = [];
   private zones: ZoneDef[] = [];
   private activeMargin = DEFAULT_ACTIVE_MARGIN;
   private readonly index = new SpatialIndex();
+  private loaded: LoadedScene | null = null;
+  private paths = new Map<string, AnimPath>();
+  private expandSpawns = false;
+  private arrivals: ArrivalNotice[] = [];
 
   load(scene: SceneDocument, options?: WorldLoadOptions): void {
     const doc = toSceneV2(scene as SceneV1 | SceneV2);
+    this.loaded = { doc, resolveUrl: options?.resolveUrl };
     this.activeMargin = options?.activeMargin ?? DEFAULT_ACTIVE_MARGIN;
-    this.zones = doc.zones.map((zone) => ({ ...zone }));
-    const paths = new Map(doc.paths.map((path) => [path.id, path]));
-    const actors: SimActor[] = [];
-    for (const actor of doc.actors) {
-      actors.push(this.createActor(actor, actors.length, paths, options?.resolveUrl));
+    this.expandSpawns = options?.expandSpawns ?? false;
+    this.rebuild();
+  }
+
+  setSpawnsEnabled(enabled: boolean): void {
+    if (!this.loaded || this.expandSpawns === enabled) return;
+    this.expandSpawns = enabled;
+    this.rebuild();
+  }
+
+  summon(command: VesselSummonCommand): boolean {
+    const actor = this.actors.find((item) => item.id === command.actorId);
+    if (!actor) return false;
+    if (command.pathId) {
+      const path = this.paths.get(command.pathId);
+      if (!path) return false;
+      actor.path = path;
     }
-    for (const spawn of doc.spawns) {
-      for (const actor of expandSpawn(spawn, paths)) {
-        actors.push(this.createActor(actor, actors.length, paths, options?.resolveUrl));
-      }
+    if (!actor.path) return false;
+    const length = Math.max(0, pathLength(actor.path));
+    const from = clamp(command.fromDistance ?? actor.distance, 0, length);
+    const to = clamp(command.toDistance ?? length, 0, length);
+    actor.distance = from;
+    actor.goal = to;
+    if (command.speed !== undefined) actor.speed = Math.max(0, command.speed);
+    actor.mode = "once";
+    actor.paused = false;
+    actor.direction = to >= from ? 1 : -1;
+    actor.arrivalQueued = false;
+    this.place(actor, from);
+    const travel = Math.abs(to - from);
+    if (command.quiet || travel <= 1e-3 || actor.speed <= 0) {
+      actor.finished = true;
+      actor.arrivalQueued = true;
+      return true;
     }
-    this.actors = actors;
-    this.reindex();
+    actor.finished = false;
+    return true;
+  }
+
+  pauseActor(actorId: string): void {
+    const actor = this.actors.find((item) => item.id === actorId);
+    if (actor) actor.paused = true;
+  }
+
+  resumeActor(actorId: string): void {
+    const actor = this.actors.find((item) => item.id === actorId);
+    if (!actor) return;
+    actor.paused = false;
+    if (actor.goal != null && Math.abs(actor.goal - actor.distance) > 1e-3) {
+      actor.finished = false;
+      actor.arrivalQueued = false;
+    }
+  }
+
+  setActorAlpha(actorId: string, alpha: number): void {
+    const actor = this.actors.find((item) => item.id === actorId);
+    if (!actor) return;
+    actor.alpha = clamp(alpha, 0, 1);
+  }
+
+  setLabel(actorId: string, text: string): void {
+    const actor = this.actors.find((item) => item.id === actorId);
+    if (actor) actor.label = text;
+  }
+
+  labelTracks(): readonly LabelTrack[] {
+    const tracks: LabelTrack[] = [];
+    for (const actor of this.actors) {
+      if (!actor.labelKeys || actor.labelKeys.length === 0) continue;
+      tracks.push({
+        id: actor.id,
+        keys: actor.labelKeys,
+        seconds: actor.labelSeconds ?? 0,
+        offset: actor.labelOffset ?? 0,
+        active: actor.cull === "active",
+      });
+    }
+    return tracks;
+  }
+
+  drainArrivals(): ArrivalNotice[] {
+    const notices = this.arrivals;
+    this.arrivals = [];
+    return notices;
   }
 
   update(dt: number, viewport: ViewportState): void {
@@ -81,13 +179,15 @@ export class WorldRuntime implements WorldSystem {
     for (const actor of this.actors) {
       actor.cull = classify(actor, activeIds, frozenIds);
       if (actor.cull !== "active") continue;
-      if (actor.path) {
+      if (actor.path && actor.goal != null) this.stepGoal(actor, dt);
+      else if (actor.path) {
         const follower: FollowerState = {
           pathId: actor.path.id,
           distance: actor.distance,
           speed: actor.speed,
           mode: actor.mode,
           direction: actor.direction,
+          paused: actor.paused,
         };
         const sample = stepFollower(actor.path, follower, dt);
         actor.distance = follower.distance;
@@ -116,12 +216,15 @@ export class WorldRuntime implements WorldSystem {
         anchorX: actor.anchorX,
         anchorY: actor.anchorY,
         scale: actor.scale,
+        alpha: actor.alpha,
+        flipX: actor.direction === -1 && actor.path !== undefined,
       };
       if (actor.atlasUrl) snapshot.atlasUrl = actor.atlasUrl;
       if (frame) snapshot.frame = frame;
       if (actor.imageUrl) snapshot.imageUrl = actor.imageUrl;
       if (actor.label) snapshot.label = actor.label;
       if (actor.interactionPriority !== undefined) snapshot.interactionPriority = actor.interactionPriority;
+      if (actor.tint !== undefined) snapshot.tint = actor.tint;
       return snapshot;
     });
   }
@@ -156,15 +259,69 @@ export class WorldRuntime implements WorldSystem {
 
   needsContinuous(): boolean {
     return this.actors.some(
-      (actor) => actor.cull === "active" && actor.path !== undefined && actor.speed > 0 && !actor.finished,
+      (actor) => actor.cull === "active" && actor.path !== undefined && actor.speed > 0 && !actor.finished && !actor.paused,
     );
   }
 
   clear(): void {
     this.actors = [];
     this.zones = [];
+    this.paths = new Map();
+    this.loaded = null;
+    this.expandSpawns = false;
+    this.arrivals = [];
     this.index.loadStatic([]);
     this.index.loadDynamic([]);
+  }
+
+  private rebuild(): void {
+    const loaded = this.loaded;
+    if (!loaded) return;
+    this.arrivals = [];
+    this.zones = loaded.doc.zones.map((zone) => ({ ...zone }));
+    this.paths = new Map(loaded.doc.paths.map((path) => [path.id, path]));
+    const actors: SimActor[] = [];
+    for (const actor of loaded.doc.actors) {
+      actors.push(this.createActor(actor, actors.length, this.paths, loaded.resolveUrl));
+    }
+    if (this.expandSpawns) {
+      for (const spawn of loaded.doc.spawns) {
+        for (const actor of expandSpawn(spawn, this.paths)) {
+          actors.push(this.createActor(actor, actors.length, this.paths, loaded.resolveUrl));
+        }
+      }
+    }
+    this.actors = actors;
+    this.reindex();
+  }
+
+  private stepGoal(actor: SimActor, dt: number): void {
+    if (!actor.path || actor.goal == null || actor.finished || actor.paused || dt <= 0 || actor.speed <= 0) return;
+    const dir: 1 | -1 = actor.goal >= actor.distance ? 1 : -1;
+    actor.direction = dir;
+    const remaining = Math.abs(actor.goal - actor.distance);
+    const travel = Math.min(remaining, actor.speed * dt);
+    actor.distance += dir * travel;
+    if (remaining - travel <= 1e-3) {
+      actor.distance = actor.goal;
+      actor.finished = true;
+      this.queueArrival(actor);
+    }
+    this.place(actor, actor.distance);
+  }
+
+  private queueArrival(actor: SimActor): void {
+    if (actor.arrivalQueued || !actor.path) return;
+    actor.arrivalQueued = true;
+    this.arrivals.push({ actorId: actor.id, pathId: actor.path.id });
+  }
+
+  private place(actor: SimActor, distance: number): void {
+    if (!actor.path) return;
+    const pos = pointAlong(actor.path.points, distance);
+    actor.x = pos.x;
+    actor.y = pos.y;
+    if (actor.scaleTrack) actor.scale = sampleTrack(actor.scaleTrack, distance);
   }
 
   private createActor(
@@ -179,6 +336,7 @@ export class WorldRuntime implements WorldSystem {
     const distance = def.distance ?? 0;
     const placed = path ? pointAlong(path.points, distance) : { x: def.x, y: def.y };
     const scale = def.scaleTrack ? sampleTrack(def.scaleTrack, distance) : 1;
+    const length = path ? pathLength(path) : 0;
     return {
       id: def.id,
       kind: def.kind,
@@ -201,19 +359,27 @@ export class WorldRuntime implements WorldSystem {
       speed: def.speed ?? 0,
       mode,
       direction,
-      finished: false,
+      finished: mode === "once" && length > 0 && distance >= length - 1e-3,
+      paused: false,
+      goal: null,
+      arrivalQueued: false,
       label: def.label?.text,
+      labelKeys: def.label?.cycleKeys,
+      labelSeconds: def.label?.cycleSeconds,
+      labelOffset: def.label?.cycleOffset,
       interactionPriority: def.interactionPriority,
       cullEnabled: def.cull !== false,
       cull: "hidden",
       scaleTrack: def.scaleTrack,
       scale,
+      tint: def.tint,
+      alpha: def.alpha ?? 1,
       order,
     };
   }
 
   private advanceFrame(actor: SimActor, dt: number): void {
-    if (!actor.frames || actor.frames.length === 0 || !actor.frameSeconds || dt <= 0) return;
+    if (!actor.frames || actor.frames.length === 0 || !actor.frameSeconds || dt <= 0 || actor.paused) return;
     actor.frameClock += dt;
     while (actor.frameClock >= actor.frameSeconds) {
       actor.frameClock -= actor.frameSeconds;
@@ -239,9 +405,11 @@ function classify(actor: SimActor, activeIds: Set<string>, frozenIds: Set<string
 }
 
 function actorRect(actor: SimActor): WorldRect {
-  const minX = actor.x - actor.anchorX * actor.width;
-  const minY = actor.y - actor.anchorY * actor.height;
-  return { minX, minY, maxX: minX + actor.width, maxY: minY + actor.height };
+  const width = actor.width * actor.scale;
+  const height = actor.height * actor.scale;
+  const minX = actor.x - actor.anchorX * width;
+  const minY = actor.y - actor.anchorY * height;
+  return { minX, minY, maxX: minX + width, maxY: minY + height };
 }
 
 function resolveMaybe(url: string | undefined, resolveUrl?: (relativePath: string) => string): string | undefined {
@@ -250,7 +418,7 @@ function resolveMaybe(url: string | undefined, resolveUrl?: (relativePath: strin
   return resolveUrl(url);
 }
 
-function expandSpawn(spawn: SpawnDef, paths: Map<string, AnimPath>): ActorDef[] {
+export function expandSpawn(spawn: SpawnDef, paths: Map<string, AnimPath>): ActorDef[] {
   const path = paths.get(spawn.pathId);
   if (!path) return [];
   const length = Math.max(1, pathLength(path));
@@ -258,20 +426,26 @@ function expandSpawn(spawn: SpawnDef, paths: Map<string, AnimPath>): ActorDef[] 
   const actors: ActorDef[] = [];
   for (let i = 0; i < spawn.count; i += 1) {
     const speed = spawn.speedMin + (spawn.speedMax - spawn.speedMin) * random();
+    const distance = ((i + random()) / spawn.count) * length;
     actors.push({
       id: `${spawn.id}:${i}`,
       kind: "sprite",
       x: 0,
       y: 0,
+      zIndex: spawn.zIndex,
       width: spawn.width,
       height: spawn.height,
+      anchorX: spawn.anchorX,
+      anchorY: spawn.anchorY,
       atlas: spawn.atlas,
       frames: spawn.frames,
       frame: spawn.frames[0],
+      frameSeconds: spawn.frameSeconds,
       pathId: spawn.pathId,
       speed,
       follow: spawn.follow ?? "ping-pong",
-      distance: (i / spawn.count) * length,
+      distance,
+      tint: spawn.tint,
       cull: true,
     });
   }
@@ -279,16 +453,15 @@ function expandSpawn(spawn: SpawnDef, paths: Map<string, AnimPath>): ActorDef[] 
 }
 
 function pathLength(path: AnimPath): number {
-  let length = 0;
-  for (let i = 1; i < path.points.length; i += 1) {
-    const a = path.points[i - 1]!;
-    const b = path.points[i]!;
-    length += Math.hypot(b.x - a.x, b.y - a.y);
-  }
-  return length;
+  return polylineLength(path.points);
 }
 
-function mulberry32(seed: number): () => number {
+function clamp(value: number, min = 0, max = 1): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+/** Deterministic unit random in [0, 1). Same seed reproduces distances and speeds. */
+export function mulberry32(seed: number): () => number {
   let a = seed >>> 0;
   return () => {
     a |= 0;

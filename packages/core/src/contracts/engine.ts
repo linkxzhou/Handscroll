@@ -151,6 +151,10 @@ export interface RendererAdapter {
   setTiles?(tiles: readonly VisibleTile[]): void;
   /** World actors in world coordinates. Omitted by adapters that predate Phase 1. */
   setActors?(actors: readonly ActorSnapshot[]): void;
+  /** Multiply the tile layer. Actors stay ungraded unless `gradeActors` is set. */
+  setTileGrade?(grade: TileGrade): void;
+  /** Bands drawn above tiles and below actors. `null` clears them. */
+  setUnderlay?(bands: readonly UnderlayBand[] | null): void;
   needsThree?(): boolean;
   ensureLoaded?(): Promise<void>;
   attachOverlay?(object: unknown): void;
@@ -210,6 +214,23 @@ export interface ScrollEnginePublic {
    * Resolves `null` when `renderers.three` is false or the adapter is missing.
    */
   ensureThree(): Promise<ThreeOverlayHost | null>;
+  /** Optional. Plugins that must not import pixi call through here. */
+  setTileGrade?(grade: TileGrade): void;
+  setUnderlay?(bands: readonly UnderlayBand[] | null): void;
+}
+
+export interface TileGrade {
+  /** 0 is daylight. 1 is the full night grade. */
+  darkness: number;
+  gradeActors?: boolean;
+}
+
+export interface UnderlayBand {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  time?: number;
 }
 
 export interface TileSystem {

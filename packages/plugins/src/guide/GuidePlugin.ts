@@ -15,10 +15,12 @@ export const createGuidePlugin: PluginFactory = (raw): ScrollPlugin => {
     priority: 10,
     onRegister(next) {
       ctx = next;
+      if (typeof document === "undefined") return;
       rail = document.createElement("nav");
       rail.className = "guide-rail";
       rail.setAttribute("aria-label", "Chapters");
       rail.style.pointerEvents = "none";
+      rail.style.zIndex = "8";
       next.engine.getUiLayer().appendChild(rail);
     },
     onSceneLoad(scene) {
@@ -64,7 +66,7 @@ export const createGuidePlugin: PluginFactory = (raw): ScrollPlugin => {
         Math.abs(vp.zoom - pendingArrive.zoom) <= 0.05;
       const arrived = pendingArrive;
       pendingArrive = null;
-      if (near) ctx.engine.events.emit("chapter:arrive", { id: arrived.id });
+      ctx.engine.events.emit("chapter:arrive", { id: arrived.id, completed: near });
     },
     onSceneUnload() {
       pendingArrive = null;

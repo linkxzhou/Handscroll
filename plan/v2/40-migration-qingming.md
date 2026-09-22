@@ -1,6 +1,6 @@
 # 迁移：清明上河图式街市包是第一个消费者
 
-> **实施状态：** 待 Phase 2 · Phase 1 已完成
+> **实施状态：** Phase 2 已完成 · 2026-09-22 · https://github.com/linkxzhou/Handscroll/pull/11
 
 > 包 id 不变：`qingming-riverside`。  
 > 它不定义 v2 API。API 以无画名的 world / plugins 为准；本包只填数据并留下独有任务。  

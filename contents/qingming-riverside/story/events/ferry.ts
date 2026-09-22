@@ -1,34 +1,35 @@
-import type { SchedulerLike, ViewportState } from "@handscroll/core";
-import { BERTHS, BOAT_SPRITE, worldToScreen, type WorldPoint } from "../coords.ts";
+import type { EventBusLike, SchedulerLike } from "@handscroll/core";
+import { scenePathLength } from "../paths.ts";
 
-export type BerthId = keyof typeof BERTHS;
+export type BerthId = "west" | "east";
 export type FerryMode = "idle" | "crossing";
 
-export const FERRY_CONTINUOUS_REASON = "qingming:ferry";
+export const FERRY_ACTOR_ID = "ferry";
+export const FERRY_PATH_ID = "ferry-lane";
 export const CROSSING_SECONDS = 4;
+
+export interface FerryPlan {
+  destination: BerthId;
+  fromDistance: number;
+  toDistance: number;
+  speed: number;
+}
 
 export interface FerrySnapshot {
   mode: FerryMode;
-  x: number;
-  y: number;
   berth: BerthId;
-  origin: BerthId;
   destination: BerthId;
-  progress: number;
-  direction: 1 | -1;
   disposed: boolean;
 }
 
 export interface FerryEngine {
+  events: EventBusLike;
   scheduler: SchedulerLike;
-  getViewport(): ViewportState;
-  getUiLayer(): HTMLElement;
-  getScrollId(): string | null;
 }
 
 export interface FerryController {
   summon(entityId: string): boolean;
-  step(dt: number): void;
+  request(berth: BerthId): boolean;
   dispose(): void;
   getState(): FerrySnapshot;
 }
@@ -45,160 +46,83 @@ export function dockIdToBerth(entityId: string): BerthId | null {
   return null;
 }
 
-export function berthPoint(berth: BerthId): WorldPoint {
-  const p = BERTHS[berth];
-  return { x: p.x, y: p.y };
+export function berthDistance(berth: BerthId, length: number): number {
+  return berth === "west" ? 0 : length;
 }
 
-function easeInOutCosine(t: number): number {
-  return 0.5 - 0.5 * Math.cos(Math.PI * Math.min(1, Math.max(0, t)));
-}
-
-export function createFerryController(engine: FerryEngine, options: { boatUrl?: string; autoTick?: boolean } = {}): FerryController {
-  const start = berthPoint("east");
-  let mode: FerryMode = "idle";
-  let x = start.x;
-  let y = start.y;
-  let berth: BerthId = "east";
-  let origin: BerthId = "east";
-  let destination: BerthId = "east";
-  let progress = 0;
-  let direction: 1 | -1 = 1;
-  let disposed = false;
-  let raf = 0;
-  let lastNow = 0;
-
-  const autoTick = options.autoTick ?? typeof requestAnimationFrame === "function";
-  const boatUrl =
-    options.boatUrl ??
-    `/contents/${engine.getScrollId() ?? "qingming-riverside"}/atlas/boat.webp`;
-  const boatEl = mountBoat(engine.getUiLayer(), boatUrl);
-
-  const snapshot = (): FerrySnapshot => ({
-    mode,
-    x,
-    y,
-    berth,
-    origin,
+/** Pack rule: a click on the current berth sends the hull to the other shore. */
+export function planCrossing(berth: BerthId, clicked: BerthId, length: number): FerryPlan {
+  const destination = clicked === berth ? oppositeBerth(clicked) : clicked;
+  const span = Math.max(1, length);
+  return {
     destination,
-    progress,
-    direction,
-    disposed,
-  });
-
-  const syncOverlay = (): void => {
-    if (!boatEl) return;
-    const vp = engine.getViewport();
-    const left = x - BOAT_SPRITE.anchorX;
-    const top = y - BOAT_SPRITE.anchorY;
-    const screen = worldToScreen(vp, left, top);
-    const w = BOAT_SPRITE.width * vp.zoom;
-    const h = BOAT_SPRITE.height * vp.zoom;
-    boatEl.style.left = `${screen.x}px`;
-    boatEl.style.top = `${screen.y}px`;
-    boatEl.style.width = `${w}px`;
-    boatEl.style.height = `${h}px`;
-    boatEl.style.transform = direction === -1 ? "scaleX(-1)" : "scaleX(1)";
-    boatEl.style.transformOrigin = "center center";
+    fromDistance: berthDistance(berth, span),
+    toDistance: berthDistance(destination, span),
+    speed: span / CROSSING_SECONDS,
   };
+}
 
-  const stopTick = (): void => {
-    if (raf && typeof cancelAnimationFrame === "function") cancelAnimationFrame(raf);
-    raf = 0;
-    lastNow = 0;
-  };
+export function createFerryController(engine: FerryEngine): FerryController {
+  const length = scenePathLength(FERRY_PATH_ID);
+  let mode: FerryMode = "idle";
+  let berth: BerthId = "east";
+  let destination: BerthId = "east";
+  let disposed = false;
+  const offs: Array<() => void> = [];
 
-  const tick = (now: number): void => {
-    raf = 0;
-    if (disposed) return;
-    if (!lastNow) lastNow = now;
-    const dt = Math.min(0.05, Math.max(0, (now - lastNow) / 1000));
-    lastNow = now;
-    step(dt);
-    if (!disposed && (mode === "crossing" || boatEl)) {
-      raf = requestAnimationFrame(tick);
-    }
-  };
+  const snapshot = (): FerrySnapshot => ({ mode, berth, destination, disposed });
 
-  const ensureTick = (): void => {
-    if (!autoTick || disposed || raf) return;
-    lastNow = 0;
-    raf = requestAnimationFrame(tick);
-  };
-
-  const step = (dt: number): void => {
-    if (disposed || dt <= 0) {
-      syncOverlay();
-      return;
-    }
-    if (mode === "crossing") {
-      progress = Math.min(1, progress + dt / CROSSING_SECONDS);
-      const a = berthPoint(origin);
-      const b = berthPoint(destination);
-      const e = easeInOutCosine(progress);
-      x = a.x + (b.x - a.x) * e;
-      y = a.y + 36 * Math.sin(Math.PI * e) ** 2;
-      if (progress >= 1) {
-        x = b.x;
-        y = b.y;
-        berth = destination;
-        mode = "idle";
-        progress = 1;
-        engine.scheduler.releaseContinuous(FERRY_CONTINUOUS_REASON);
-        engine.scheduler.requestFrame();
-      } else {
-        engine.scheduler.requestFrame();
-      }
-    }
-    syncOverlay();
+  const request = (clicked: BerthId): boolean => {
+    if (disposed || mode === "crossing") return false;
+    const plan = planCrossing(berth, clicked, length);
+    destination = plan.destination;
+    mode = "crossing";
+    engine.events.emit("vessel:summon", {
+      actorId: FERRY_ACTOR_ID,
+      pathId: FERRY_PATH_ID,
+      fromDistance: plan.fromDistance,
+      toDistance: plan.toDistance,
+      speed: plan.speed,
+    });
+    engine.scheduler.requestFrame();
+    return true;
   };
 
   const summon = (entityId: string): boolean => {
-    if (disposed) return false;
     const clicked = dockIdToBerth(entityId);
     if (!clicked) return false;
-    if (mode === "crossing") return false;
-    const dest = clicked === berth ? oppositeBerth(clicked) : clicked;
-    origin = berth;
-    destination = dest;
-    progress = 0;
-    mode = "crossing";
-    direction = dest === "west" ? -1 : 1;
-    engine.scheduler.requestContinuous(FERRY_CONTINUOUS_REASON);
-    engine.scheduler.requestFrame();
-    ensureTick();
-    return true;
+    return request(clicked);
   };
+
+  offs.push(
+    engine.events.on("dock:request", (payload) => {
+      const berthId = readBerth(payload);
+      if (berthId) request(berthId);
+    }),
+  );
+  offs.push(
+    engine.events.on("vessel:arrived", (payload) => {
+      if (disposed || mode !== "crossing") return;
+      if (!payload || typeof payload !== "object") return;
+      if ((payload as { actorId?: unknown }).actorId !== FERRY_ACTOR_ID) return;
+      berth = destination;
+      mode = "idle";
+    }),
+  );
 
   const dispose = (): void => {
     if (disposed) return;
     disposed = true;
     mode = "idle";
-    progress = 0;
-    stopTick();
-    engine.scheduler.releaseContinuous(FERRY_CONTINUOUS_REASON);
-    boatEl?.remove();
+    for (const off of offs) off();
+    offs.length = 0;
   };
 
-  syncOverlay();
-  ensureTick();
-
-  return { summon, step, dispose, getState: snapshot };
+  return { summon, request, dispose, getState: snapshot };
 }
 
-function mountBoat(ui: HTMLElement | null | undefined, url: string): HTMLImageElement | null {
-  if (!ui || typeof document === "undefined") return null;
-  const img = document.createElement("img");
-  img.className = "qingming-boat";
-  img.alt = "";
-  img.src = url;
-  img.setAttribute("aria-hidden", "true");
-  img.draggable = false;
-  ui.appendChild(img);
-  return img;
-}
-
-/** @deprecated use createFerryController — alias for tests that talk about the state machine. */
-export function createFerryStateMachine(engine: FerryEngine, options?: { boatUrl?: string; autoTick?: boolean }): FerryController {
-  return createFerryController(engine, options);
+function readBerth(payload: unknown): BerthId | null {
+  if (!payload || typeof payload !== "object" || !("berth" in payload)) return null;
+  const berth = (payload as { berth?: unknown }).berth;
+  return berth === "west" || berth === "east" ? berth : null;
 }

@@ -8,6 +8,8 @@ import type {
   SceneDocument,
   ScrollEnginePublic,
   ThreeOverlayHost,
+  TileGrade,
+  UnderlayBand,
   VisibleTile,
 } from "./contracts/engine.ts";
 import { DEFAULT_CACHE_POLICY } from "./contracts/engine.ts";
@@ -68,11 +70,8 @@ export class ScrollEngine implements ScrollEnginePublic {
     this.dpr = 1;
     this.uiLayer = document.createElement("div");
     this.uiLayer.className = "ui-layer";
-    this.plugins.setContext({
-      engine: this,
-      scene: null,
-      quality: this.quality,
-    });
+    this.events.on("actor:alpha", (payload) => this.onActorAlpha(payload));
+    this.plugins.setContext(this.pluginContext(null));
   }
 
   static async create(options: EngineCreateOptions, services: EngineServices): Promise<ScrollEngine> {
@@ -89,8 +88,8 @@ export class ScrollEngine implements ScrollEnginePublic {
     this.scrollId = scrollId;
     this.meta = meta;
 
+    this.plugins.setContext(this.pluginContext(null));
     await this.plugins.loadBuiltins(meta.plugins ?? [], meta.pluginConfig);
-    this.plugins.setContext({ engine: this, scene: null, quality: this.quality });
 
     const manifest = await this.options.contentResolver.loadManifest(scrollId);
     const tilesBase = this.options.contentResolver.resolveUrl(scrollId, "tiles/");
@@ -198,6 +197,14 @@ export class ScrollEngine implements ScrollEnginePublic {
 
   getScrollId(): string | null {
     return this.scrollId;
+  }
+
+  setTileGrade(grade: TileGrade): void {
+    this.pixi?.setTileGrade?.(grade);
+  }
+
+  setUnderlay(bands: readonly UnderlayBand[] | null): void {
+    this.pixi?.setUnderlay?.(bands);
   }
 
   async ensureThree(): Promise<ThreeOverlayHost | null> {
@@ -345,6 +352,8 @@ export class ScrollEngine implements ScrollEnginePublic {
     this.services.world.clear();
     this.triggers.reset();
     this.pixi?.setActors?.([]);
+    this.pixi?.setTileGrade?.({ darkness: 0 });
+    this.pixi?.setUnderlay?.(null);
     this.scheduler.releaseContinuous("world");
     this.services.assets.cancelAll();
     this.scene = null;
@@ -355,5 +364,22 @@ export class ScrollEngine implements ScrollEnginePublic {
 
   private assertAlive(): void {
     if (this.destroyed) throw new Error("ScrollEngine has been destroyed");
+  }
+
+  private pluginContext(scene: SceneDocument | null) {
+    return {
+      engine: this,
+      scene,
+      quality: this.quality,
+      world: this.services.world,
+    };
+  }
+
+  private onActorAlpha(payload: unknown): void {
+    if (!payload || typeof payload !== "object") return;
+    const id = (payload as { id?: unknown }).id;
+    const alpha = (payload as { alpha?: unknown }).alpha;
+    if (typeof id !== "string" || typeof alpha !== "number" || !Number.isFinite(alpha)) return;
+    this.services.world.setActorAlpha(id, alpha);
   }
 }

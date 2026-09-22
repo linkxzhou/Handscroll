@@ -18,10 +18,15 @@ describe("qingming-riverside pack load Q-A-02", () => {
     expect(meta.id).toBe("qingming-riverside");
     expect(meta.width).toBe(6516);
     expect(meta.height).toBe(724);
-    expect(meta.plugins).toEqual(["quality", "guide", "audio", "weather", "water"]);
+    expect(meta.plugins).toEqual(["quality", "guide", "audio", "weather", "water", "atmosphere", "crowd", "vessel"]);
+    expect(meta.pluginConfig?.water).toMatchObject({ composite: "pixi-underlay" });
     expect(meta.defaultViewport?.centerX).toBe(3120);
+    expect(scene.version).toBe(2);
+    if (scene.version !== 2) return;
     expect(scene.chapters.map((c) => c.id)).toEqual(["watermill", "teahouse", "bridge", "gate"]);
-    expect(scene.entities.some((e) => e.id === "ferry-boat" && e.type === "sprite")).toBe(true);
+    expect(scene.entities.some((e) => e.id === "ferry-boat")).toBe(false);
+    expect(scene.actors.some((actor) => actor.id === "ferry" && actor.kind === "sprite")).toBe(true);
+    expect(scene.actors.some((actor) => actor.id === "cargo")).toBe(true);
     expect(scene.entities.some((e) => e.id === "bridge-event" && e.type === "hotspot")).toBe(true);
     expect(scene.entities.filter((e) => e.id.startsWith("dock-")).map((e) => e.id).sort()).toEqual(["dock-east", "dock-west"]);
   });

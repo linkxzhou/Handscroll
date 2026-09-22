@@ -16,6 +16,8 @@ export interface ActorLabelDef {
   text?: string;
   cycleKeys?: string[];
   cycleSeconds?: number;
+  /** Seconds added before the first cycle, so neighboring signs do not flip together. */
+  cycleOffset?: number;
 }
 
 export interface ActorDef {
@@ -41,6 +43,10 @@ export interface ActorDef {
   interactionPriority?: number;
   cull?: boolean;
   scaleTrack?: { distance: number; value: number }[];
+  /** 0xRRGGBB. Omitted leaves the texture untinted. */
+  tint?: number;
+  /** 0–1. Omitted means fully opaque. */
+  alpha?: number;
 }
 
 export type ZoneShape =
@@ -68,6 +74,36 @@ export interface SpawnDef {
   seed: number;
   width: number;
   height: number;
+  tint?: number;
+  zIndex?: number;
+  frameSeconds?: number;
+  anchorX?: number;
+  anchorY?: number;
+}
+
+/** Story or a trigger asks a vessel actor to travel a path segment. */
+export interface VesselSummonCommand {
+  actorId: string;
+  pathId?: string;
+  fromDistance?: number;
+  toDistance?: number;
+  speed?: number;
+  /** Place the actor and do not emit an arrival. */
+  quiet?: boolean;
+}
+
+export interface LabelTrack {
+  id: string;
+  keys: string[];
+  seconds: number;
+  offset: number;
+  /** True when the label actor is inside the active cull rect. */
+  active: boolean;
+}
+
+export interface ArrivalNotice {
+  actorId: string;
+  pathId: string;
 }
 
 export interface DialogueStub {
@@ -114,6 +150,12 @@ export interface ActorSnapshot {
 export interface WorldLoadOptions {
   activeMargin?: number;
   resolveUrl?: (relativePath: string) => string;
+  /**
+   * When true, `spawns` become actors during load.
+   * Default false: the crowd plugin turns them on so a pack without crowd
+   * keeps the spawn rows as data only.
+   */
+  expandSpawns?: boolean;
 }
 
 export interface WorldSystem {
@@ -125,4 +167,14 @@ export interface WorldSystem {
   getActorPosition(id: string): { x: number; y: number } | null;
   needsContinuous(): boolean;
   clear(): void;
+  /** Instantiate scene spawns, or drop those instances. Other actors reload from the scene. */
+  setSpawnsEnabled(enabled: boolean): void;
+  summon(command: VesselSummonCommand): boolean;
+  pauseActor(actorId: string): void;
+  resumeActor(actorId: string): void;
+  setActorAlpha(actorId: string, alpha: number): void;
+  setLabel(actorId: string, text: string): void;
+  labelTracks(): readonly LabelTrack[];
+  /** Arrival notices since the previous drain. Each completed summon is queued once. */
+  drainArrivals(): ArrivalNotice[];
 }

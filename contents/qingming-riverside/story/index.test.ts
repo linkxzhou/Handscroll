@@ -1,17 +1,14 @@
 import { describe, expect, it } from "vitest";
 import type { ScrollEnginePublic } from "@handscroll/core";
 import { EventBus } from "@handscroll/core";
+import { CARGO_ACTOR_ID } from "./events/bridge-quest.ts";
+import { FERRY_ACTOR_ID } from "./events/ferry.ts";
 import { registerStory } from "./index.ts";
-import { FERRY_CONTINUOUS_REASON } from "./events/ferry.ts";
-import { BRIDGE_CONTINUOUS_REASON } from "./events/bridge.ts";
-import { STREET_CONTINUOUS_REASON } from "./events/street-life.ts";
 
-function mockEngine(): ScrollEnginePublic & { continuous: Set<string> } {
+function mockEngine(): ScrollEnginePublic {
   const events = new EventBus();
-  const continuous = new Set<string>();
   return {
     events,
-    continuous,
     camera: {
       getState: () => ({ centerX: 3258, centerY: 362, zoom: 1, screenWidth: 800, screenHeight: 600 }),
       flyTo: () => {},
@@ -20,12 +17,8 @@ function mockEngine(): ScrollEnginePublic & { continuous: Set<string> } {
     scheduler: {
       requestFrame: () => {},
       wake: () => {},
-      requestContinuous: (reason: string) => {
-        continuous.add(reason);
-      },
-      releaseContinuous: (reason: string) => {
-        continuous.delete(reason);
-      },
+      requestContinuous: () => {},
+      releaseContinuous: () => {},
     },
     getViewport: () => ({ centerX: 3258, centerY: 362, zoom: 1, screenWidth: 800, screenHeight: 600 }),
     setQuality: () => {},
@@ -38,29 +31,39 @@ function mockEngine(): ScrollEnginePublic & { continuous: Set<string> } {
     }),
     setCachePolicy: () => {},
     getContainer: () => ({}) as HTMLElement,
-    getUiLayer: () => ({ appendChild: (n: unknown) => n }) as HTMLElement,
+    getUiLayer: () => ({ appendChild: (node: unknown) => node }) as HTMLElement,
     getDpr: () => 1,
     getScrollId: () => "qingming-riverside",
     ensureThree: async () => null,
   };
 }
 
-describe("qingming registerStory pack load", () => {
-  it("registers, summons on dock click, and cleans up on unload", () => {
+describe("qingming registerStory", () => {
+  it("summons the ferry from a dock request and ignores clicks after cleanup", () => {
     const engine = mockEngine();
+    const summons: string[] = [];
+    engine.events.on("vessel:summon", (payload) => {
+      if (payload && typeof payload === "object" && (payload as { actorId?: unknown }).actorId === FERRY_ACTOR_ID) {
+        summons.push(FERRY_ACTOR_ID);
+      }
+    });
     const cleanup = registerStory(engine);
-    engine.events.emit("entity:click", { entityId: "dock-west", renderer: "pixi", interactionPriority: 1, worldX: 0, worldY: 0 });
-    expect(engine.continuous.has(FERRY_CONTINUOUS_REASON)).toBe(true);
+    engine.events.emit("dock:request", { berth: "west" });
+    expect(summons).toEqual([FERRY_ACTOR_ID]);
     cleanup();
-    expect(engine.continuous.has(FERRY_CONTINUOUS_REASON)).toBe(false);
-    engine.continuous.clear();
-    engine.events.emit("entity:click", { entityId: "dock-west", renderer: "pixi", interactionPriority: 1, worldX: 0, worldY: 0 });
-    expect(engine.continuous.has(FERRY_CONTINUOUS_REASON)).toBe(false);
+    engine.events.emit("dock:request", { berth: "east" });
+    expect(summons).toEqual([FERRY_ACTOR_ID]);
     expect(() => cleanup()).not.toThrow();
   });
 
-  it("starts 虹桥过船 from the bridge-event hotspot and disposes with ferry", () => {
+  it("starts the bridge quest from the bridge hotspot and disposes it", () => {
     const engine = mockEngine();
+    const summons: string[] = [];
+    engine.events.on("vessel:summon", (payload) => {
+      if (payload && typeof payload === "object" && (payload as { actorId?: unknown }).actorId === CARGO_ACTOR_ID) {
+        summons.push(CARGO_ACTOR_ID);
+      }
+    });
     const cleanup = registerStory(engine);
     engine.events.emit("entity:click", {
       entityId: "bridge-event",
@@ -69,10 +72,9 @@ describe("qingming registerStory pack load", () => {
       worldX: 0,
       worldY: 0,
     });
-    expect(engine.continuous.has(BRIDGE_CONTINUOUS_REASON)).toBe(true);
+    expect(summons.length).toBeGreaterThan(0);
     cleanup();
-    expect(engine.continuous.has(BRIDGE_CONTINUOUS_REASON)).toBe(false);
-    expect(engine.continuous.has(FERRY_CONTINUOUS_REASON)).toBe(false);
+    const after = summons.length;
     engine.events.emit("entity:click", {
       entityId: "bridge-event",
       renderer: "pixi",
@@ -80,25 +82,7 @@ describe("qingming registerStory pack load", () => {
       worldX: 0,
       worldY: 0,
     });
-    expect(engine.continuous.has(BRIDGE_CONTINUOUS_REASON)).toBe(false);
-    expect(() => cleanup()).not.toThrow();
-  });
-
-  it("disposes atmosphere HUD, street-life, ferry, and bridge together", () => {
-    const engine = mockEngine();
-    const cleanup = registerStory(engine);
-    engine.events.emit("entity:click", {
-      entityId: "bridge-event",
-      renderer: "pixi",
-      interactionPriority: 1,
-      worldX: 0,
-      worldY: 0,
-    });
-    expect(engine.continuous.has(BRIDGE_CONTINUOUS_REASON)).toBe(true);
-    cleanup();
-    expect(engine.continuous.has(BRIDGE_CONTINUOUS_REASON)).toBe(false);
-    expect(engine.continuous.has(FERRY_CONTINUOUS_REASON)).toBe(false);
-    expect(engine.continuous.has(STREET_CONTINUOUS_REASON)).toBe(false);
+    expect(summons.length).toBe(after);
     expect(() => cleanup()).not.toThrow();
   });
 });

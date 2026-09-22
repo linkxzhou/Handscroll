@@ -30,13 +30,14 @@ export interface AtmosphereController {
   getState(): AtmosphereSnapshot;
 }
 
+/** Screen HUD. Night is `atmosphere:night` on the tile layer, not a DOM wash. */
 export function createAtmosphereController(engine: AtmosphereEngine): AtmosphereController {
   let rain = false;
   let night = false;
   let water = true;
   let muted = true;
   let disposed = false;
-  const overlays = mountAtmosphere(engine.getUiLayer());
+  const hud = mountHud(engine.getUiLayer());
 
   const snapshot = (): AtmosphereSnapshot => ({
     rain,
@@ -48,16 +49,15 @@ export function createAtmosphereController(engine: AtmosphereEngine): Atmosphere
   });
 
   const syncHud = (): void => {
-    if (!overlays) return;
-    overlays.night.hidden = !night;
-    overlays.rainBtn.classList.toggle("is-on", rain);
-    overlays.nightBtn.classList.toggle("is-on", night);
-    overlays.waterBtn.classList.toggle("is-on", water);
-    overlays.audioBtn.classList.toggle("is-on", !muted);
-    overlays.rainBtn.setAttribute("aria-pressed", String(rain));
-    overlays.nightBtn.setAttribute("aria-pressed", String(night));
-    overlays.waterBtn.setAttribute("aria-pressed", String(water));
-    overlays.audioBtn.setAttribute("aria-pressed", String(!muted));
+    if (!hud) return;
+    hud.rainBtn.classList.toggle("is-on", rain);
+    hud.nightBtn.classList.toggle("is-on", night);
+    hud.waterBtn.classList.toggle("is-on", water);
+    hud.audioBtn.classList.toggle("is-on", !muted);
+    hud.rainBtn.setAttribute("aria-pressed", String(rain));
+    hud.nightBtn.setAttribute("aria-pressed", String(night));
+    hud.waterBtn.setAttribute("aria-pressed", String(water));
+    hud.audioBtn.setAttribute("aria-pressed", String(!muted));
   };
 
   const syncWeather = (): void => {
@@ -72,8 +72,8 @@ export function createAtmosphereController(engine: AtmosphereEngine): Atmosphere
     else engine.events.emit("audio:stop", { id: "ambient-water" });
   };
 
-  const syncMuted = (): void => {
-    engine.events.emit("audio:setMuted", { muted });
+  const syncNight = (): void => {
+    engine.events.emit("atmosphere:night", { enabled: night });
   };
 
   const setRain = (on: boolean): void => {
@@ -87,6 +87,7 @@ export function createAtmosphereController(engine: AtmosphereEngine): Atmosphere
   const setNight = (on: boolean): void => {
     if (disposed) return;
     night = on;
+    syncNight();
     syncHud();
     engine.scheduler.requestFrame();
   };
@@ -102,7 +103,7 @@ export function createAtmosphereController(engine: AtmosphereEngine): Atmosphere
   const setMuted = (on: boolean): void => {
     if (disposed) return;
     muted = on;
-    syncMuted();
+    engine.events.emit("audio:setMuted", { muted });
     syncHud();
   };
 
@@ -115,58 +116,48 @@ export function createAtmosphereController(engine: AtmosphereEngine): Atmosphere
     muted = true;
     syncWeather();
     syncWater();
-    syncMuted();
-    overlays?.hud.remove();
-    overlays?.night.remove();
+    syncNight();
+    engine.events.emit("audio:setMuted", { muted: true });
+    hud?.root.remove();
   };
 
-  if (overlays) {
-    overlays.rainBtn.addEventListener("click", () => setRain(!rain));
-    overlays.nightBtn.addEventListener("click", () => setNight(!night));
-    overlays.waterBtn.addEventListener("click", () => setWater(!water));
-    overlays.audioBtn.addEventListener("click", () => setMuted(!muted));
+  if (hud) {
+    hud.rainBtn.addEventListener("click", () => setRain(!rain));
+    hud.nightBtn.addEventListener("click", () => setNight(!night));
+    hud.waterBtn.addEventListener("click", () => setWater(!water));
+    hud.audioBtn.addEventListener("click", () => setMuted(!muted));
   }
 
   syncHud();
   syncWeather();
   syncWater();
-  syncMuted();
+  syncNight();
+  engine.events.emit("audio:setMuted", { muted });
 
   return { setRain, setNight, setWater, setMuted, dispose, getState: snapshot };
 }
 
-interface AtmosphereOverlays {
-  hud: HTMLElement;
-  night: HTMLElement;
+interface HudNodes {
+  root: HTMLElement;
   rainBtn: HTMLButtonElement;
   nightBtn: HTMLButtonElement;
   waterBtn: HTMLButtonElement;
   audioBtn: HTMLButtonElement;
 }
 
-function mountAtmosphere(ui: HTMLElement | null | undefined): AtmosphereOverlays | null {
+function mountHud(ui: HTMLElement | null | undefined): HudNodes | null {
   if (!ui || typeof document === "undefined") return null;
-
-  const night = document.createElement("div");
-  night.className = "qingming-night";
-  night.hidden = true;
-  night.setAttribute("aria-hidden", "true");
-  night.title = "Faked night: multiply color wash, not a second tile set";
-  ui.appendChild(night);
-
-  const hud = document.createElement("div");
-  hud.className = "qingming-atmo";
-  hud.setAttribute("role", "toolbar");
-  hud.setAttribute("aria-label", copy["atmo.toolbar"] ?? "氛围");
-
+  const root = document.createElement("div");
+  root.className = "qingming-atmo";
+  root.setAttribute("role", "toolbar");
+  root.setAttribute("aria-label", copy["atmo.toolbar"] ?? "氛围");
   const rainBtn = pill(copy["atmo.rain"] ?? "时雨");
   const nightBtn = pill(copy["atmo.night"] ?? "夜景");
   const waterBtn = pill(copy["atmo.water"] ?? "水面");
   const audioBtn = pill(copy["atmo.audio"] ?? "音效");
-  hud.append(rainBtn, nightBtn, waterBtn, audioBtn);
-  ui.appendChild(hud);
-
-  return { hud, night, rainBtn, nightBtn, waterBtn, audioBtn };
+  root.append(rainBtn, nightBtn, waterBtn, audioBtn);
+  ui.appendChild(root);
+  return { root, rainBtn, nightBtn, waterBtn, audioBtn };
 }
 
 function pill(label: string): HTMLButtonElement {

@@ -12,7 +12,7 @@ const WEATHER_CSS = `
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 7;
+  z-index: 3;
   overflow: hidden;
 }
 .hs-weather[data-weather="clear"] { display: none; }

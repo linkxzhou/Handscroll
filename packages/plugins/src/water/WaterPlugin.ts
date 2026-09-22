@@ -13,9 +13,16 @@ export interface WaterBand {
   h: number;
 }
 
+export type WaterComposite = "three-overlay" | "pixi-underlay";
+
 export interface WaterPluginConfig {
   enabled?: boolean;
   bands?: WaterBand[];
+  /**
+   * `three-overlay` covers the Pixi view (default, no hulls on the water).
+   * `pixi-underlay` draws the band above tiles and below actors.
+   */
+  composite?: WaterComposite;
 }
 
 export const WATER_CONTINUOUS_REASON = "water";
@@ -55,6 +62,10 @@ export interface WaterEffectHandle {
   dispose(): void;
 }
 
+export function parseWaterComposite(value: unknown): WaterComposite {
+  return value === "pixi-underlay" ? "pixi-underlay" : "three-overlay";
+}
+
 export function parseWaterEnabled(payload: unknown, fallback: boolean): boolean {
   if (payload && typeof payload === "object" && "enabled" in payload) {
     return Boolean((payload as { enabled: unknown }).enabled);
@@ -77,6 +88,7 @@ export function worldRectToScreen(
 
 export const createWaterPlugin: PluginFactory = (raw): ScrollPlugin => {
   const config = (raw ?? {}) as WaterPluginConfig;
+  const composite = parseWaterComposite(config.composite);
   const bands = (config.bands ?? []).filter((b) => b.w > 0 && b.h > 0);
   let enabled = config.enabled !== false && bands.length > 0;
   let ctx: EngineContext | null = null;
@@ -86,12 +98,12 @@ export const createWaterPlugin: PluginFactory = (raw): ScrollPlugin => {
   let offSet: (() => void) | null = null;
   let time = 0;
   let attachToken = 0;
-  let path: "three" | "dom" | "none" = "none";
+  let path: "three" | "dom" | "pixi" | "none" = "none";
 
   const syncScheduler = (): void => {
     const scheduler = ctx?.engine.scheduler;
     if (!scheduler) return;
-    if (enabled && bands.length > 0 && path !== "none") {
+    if (enabled && bands.length > 0 && (path === "three" || path === "dom" || path === "pixi")) {
       scheduler.requestContinuous(WATER_CONTINUOUS_REASON);
       scheduler.requestFrame();
     } else {
@@ -153,14 +165,36 @@ export const createWaterPlugin: PluginFactory = (raw): ScrollPlugin => {
   const teardownVisuals = (): void => {
     detachThree();
     unmountFallback();
+    ctx?.engine.setUnderlay?.(null);
     host = null;
     path = "none";
     syncScheduler();
   };
 
+  const publishUnderlay = (): void => {
+    ctx?.engine.setUnderlay?.(
+      bands.map((band) => ({
+        x: band.x,
+        y: band.y,
+        w: band.w,
+        h: band.h,
+        time,
+      })),
+    );
+  };
+
   const attachVisuals = async (): Promise<void> => {
     if (!ctx || !enabled || bands.length === 0) {
       teardownVisuals();
+      return;
+    }
+    if (composite === "pixi-underlay") {
+      detachThree();
+      unmountFallback();
+      host = null;
+      path = "pixi";
+      publishUnderlay();
+      syncScheduler();
       return;
     }
     const token = ++attachToken;
@@ -218,6 +252,7 @@ export const createWaterPlugin: PluginFactory = (raw): ScrollPlugin => {
       if (!enabled) return;
       time += dt;
       effect?.setTime(time);
+      if (path === "pixi") publishUnderlay();
       if (path === "dom") {
         layoutFallback();
         void viewport;
