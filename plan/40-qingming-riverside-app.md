@@ -1,5 +1,7 @@
 # 应用层计划：清明上河图式街市卷（qingming-riverside）
 
+> **v1 baseline（shipped 2026-09）** — 历史基线。迁到 v2 系统见 [v2/40-migration-qingming.md](./v2/40-migration-qingming.md)。
+
 > 目标：用 **Handscroll 引擎** + `third_party/qingming-riverside` **素材与交互语义**，在应用层落地一个可浏览、可渐进接入玩法的 content pack。  
 > 不是把参考项目的 Canvas 2D 运行时搬进 core；**引擎不改业务硬编码**，本画全部落在 `contents/qingming-riverside/`（+ 必要时升格通用插件）。
 

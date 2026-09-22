@@ -1,5 +1,7 @@
 # 业务层详细实现计划
 
+> **v1 baseline（shipped 2026-09）** — 历史基线。内容包 v2 见 [v2/30-content-pack-v2.md](./v2/30-content-pack-v2.md)。
+
 > 对应总览：[01-engine-implementation.md](./01-engine-implementation.md)  
 > 关联：[10-core-engine.md](./10-core-engine.md) · [20-plugin-layer.md](./20-plugin-layer.md)
 

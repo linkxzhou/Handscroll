@@ -72,4 +72,4 @@ contents/demo-scroll
 contents/qingming-riverside   # riverside street pack (tiles + story)
 ```
 
-Plans in `plan/` are the source of truth. This milestone is Phase 0 + engine E0–E2: you can put an image in `raw/`, tile it, and pan/zoom in the playground.
+Plans in `plan/` are the source of truth. Shipped behavior is the v1 baseline (2026-09). The active optimization plan is [plan/v2/00-overview.md](plan/v2/00-overview.md) (scroll game engine for many long paintings). v1 docs stay in `plan/` as history.

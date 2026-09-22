@@ -1,5 +1,7 @@
 # Water effect renderer path
 
+> **v1 baseline（shipped 2026-09）** — lazy Three 水面仍然有效。v2 取消「河上的船优先 DOM」这一后果，见 [../v2/adr/0005-occlusion-and-water-composite.md](../v2/adr/0005-occlusion-and-water-composite.md)。
+
 - Status: accepted for Phase E
 - Date: 2026-09-21
 - Relates: [0001-renderer-topology.md](./0001-renderer-topology.md), [20-plugin-layer.md](../20-plugin-layer.md) §4.5
