@@ -33,13 +33,17 @@ describe("viewer gallery pack registry", () => {
 
   it("lists published packs with qingming first and demo secondary", () => {
     const packs = assembleGalleryPacks(metasFromDisk(), new Set(["qingming-riverside"]));
-    expect(packs.map((p) => p.id)).toEqual(["qingming-riverside", "demo-scroll"]);
+    expect(packs.map((p) => p.id)).toEqual(["qingming-riverside", "path-walker", "demo-scroll"]);
     expect(packs[0]?.featured).toBe(true);
     expect(packs[0]?.title).toBe("沿河街市（清明上河图式）");
     expect(packs[0]?.coverUrl).toBe("/contents/qingming-riverside/preview/cover.webp");
     expect(packs[0]?.href).toBe("/?scroll=qingming-riverside");
-    expect(packs[1]?.secondary).toBe(true);
-    expect(packs[1]?.featured).toBe(false);
+    const demo = packs.find((pack) => pack.id === "demo-scroll");
+    expect(demo?.secondary).toBe(true);
+    expect(demo?.featured).toBe(false);
+    const fixture = packs.find((pack) => pack.id === "path-walker");
+    expect(fixture?.featured).toBe(false);
+    expect(fixture?.secondary).toBe(false);
   });
 
   it("builds deep links and skips templates from a Vite-style glob", () => {

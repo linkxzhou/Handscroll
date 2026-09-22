@@ -3,6 +3,7 @@ import { AssetManager } from "@handscroll/assets";
 import { TileManager } from "@handscroll/tiles";
 import { InteractionManager } from "@handscroll/interaction";
 import { AnimationRuntime } from "@handscroll/animation";
+import { WorldRuntime } from "@handscroll/world";
 import { createPixiRenderer } from "@handscroll/renderer-pixi";
 import { createLazyThreeRenderer } from "@handscroll/renderer-three";
 import { builtinPlugins } from "@handscroll/plugins";
@@ -39,6 +40,7 @@ export async function bootHandscroll(container: HTMLElement, scrollId: string): 
       tiles,
       interaction: new InteractionManager(),
       animation: new AnimationRuntime(),
+      world: new WorldRuntime(),
     },
   );
   schedulerWake.current = () => engine.scheduler.wake();

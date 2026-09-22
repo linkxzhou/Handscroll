@@ -1,43 +1,25 @@
-import type { SceneEntity } from "@handscroll/core";
-import { pick, pickAll } from "./pick.ts";
-
-/** Minimal AABB list. Flatbush can replace this later without changing callers. */
-export class FlatbushIndex {
-  private entities: SceneEntity[] = [];
-
-  load(entities: readonly SceneEntity[]): void {
-    this.entities = [...entities];
-  }
-
-  query(worldX: number, worldY: number): SceneEntity[] {
-    return this.entities.filter((e) => {
-      if (e.type !== "hotspot") return false;
-      const shape = e.shape;
-      if (shape.kind === "rect") {
-        return worldX >= e.x && worldY >= e.y && worldX <= e.x + shape.w && worldY <= e.y + shape.h;
-      }
-      if (shape.kind === "circle") {
-        return (worldX - e.x) ** 2 + (worldY - e.y) ** 2 <= shape.r ** 2;
-      }
-      return true;
-    });
-  }
-}
+import type { AabbItem, SceneEntity } from "@handscroll/core";
+import { hotspotItems, resolveHits } from "./pick.ts";
+import { SpatialIndex } from "./SpatialIndex.ts";
 
 export class InteractionManager {
   private entities: SceneEntity[] = [];
-  private readonly index = new FlatbushIndex();
+  private readonly index = new SpatialIndex();
 
   setEntities(entities: readonly SceneEntity[]): void {
     this.entities = [...entities];
-    this.index.load(this.entities);
+    this.index.loadStatic(hotspotItems(this.entities));
+  }
+
+  sync(items: readonly AabbItem[]): void {
+    this.index.loadDynamic(items);
   }
 
   pick(worldX: number, worldY: number) {
-    return pick(worldX, worldY, this.entities);
+    return this.pickAll(worldX, worldY)[0] ?? null;
   }
 
   pickAll(worldX: number, worldY: number) {
-    return pickAll(worldX, worldY, this.entities);
+    return resolveHits(this.index.queryPoint(worldX, worldY), this.entities, worldX, worldY);
   }
 }

@@ -27,7 +27,7 @@ try {
 
 const meta = MetaSchema.parse(JSON.parse(await fs.readFile(path.join(contentDir, "meta.json"), "utf8")));
 const scene = {
-  version: 1,
+  version: 2,
   meta: { id: meta.id, width: meta.width, height: meta.height },
   background: { manifestUrl: "./tiles/manifest.json" },
   entities: [],
@@ -42,6 +42,12 @@ const scene = {
         },
       ]
     : [],
+  paths: [],
+  actors: [],
+  zones: [],
+  spawns: [],
+  dialogues: [],
+  triggers: [],
 };
 
 await fs.writeFile(scenePath, JSON.stringify(scene, null, 2) + "\n");

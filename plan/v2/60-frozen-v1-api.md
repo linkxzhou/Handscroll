@@ -1,8 +1,12 @@
 # 冻结的 v1 表面（Phase 0）
 
-> **实施状态：** Phase 0 已完成 · Phase 1 起不得在未记一笔的情况下改变下列语义
+> **实施状态：** Phase 0 已完成 · Phase 1 已在旁边加能力 · 下列语义仍冻结
 
-Phase 1 可以在这些 API **旁边**加能力（例如世界模拟、`setActors`）。改变下列签名或语义之前，先在本文件加一条「变更说明」，并在 PR 里点名。
+Phase 1 在这些 API **旁边**加了世界模拟与 `setActors`。改变下列签名或语义之前，先在本文件加一条「变更说明」，并在 PR 里点名。
+
+## 0. 变更说明
+
+- 2026-09-22 Phase 1：新增 `RendererAdapter.setActors`、`TimeService`、`TriggerRuntime`、`EngineServices.world`、`InteractionSystem.sync`。未改 `loadContent` 的卸载/装载顺序、`HitResult` 字段、`weather:set`、`camera.flyTo` 的毫秒时长与夹取、`requestContinuous` 的 reason 集合语义。镜头 `update` 仍用调度器墙钟，因此暂停时飞镜与惯性仍会结束。`guide` 在飞镜结束且镜头落到章节目标附近时额外发出 `chapter:arrive`。
 
 ADR [0003](./adr/0003-world-actors-pixi.md)、[0004](./adr/0004-scene-schema-versioning.md)、[0005](./adr/0005-occlusion-and-water-composite.md) 保持 **accepted**。本文件只把它们落到「现在不能悄悄改什么」。
 
@@ -36,13 +40,13 @@ ADR [0003](./adr/0003-world-actors-pixi.md)、[0004](./adr/0004-scene-schema-ver
 | 输入 | 行为 |
 |---|---|
 | `version: 1` | 按已发布形状通过：`meta`、`background`、`entities`（sprite / animation / hotspot / model3d）、`chapters`。不注入世界数组。文档上的 `paths` 等未知键被 **剥掉**（Zod 默认 strip，不拒绝、不保留）。 |
-| `version: 2` | 同一套实体形状，外加六个数组：`paths`、`actors`、`zones`、`spawns`、`dialogues`、`triggers`。缺省 `[]`。元素类型是 `unknown`：**原样保留、运行时不解释**。元素 schema、与 `meta` 宽高的交叉校验、`toSceneV2` 都留给 Phase 1。其它未知键剥掉。 |
+| `version: 2` | 同一套实体形状，外加六个数组：`paths`、`actors`、`zones`、`spawns`、`dialogues`、`triggers`。缺省 `[]`。元素按 Phase 1 的 Zod schema 校验（不再是 `unknown`）。其它未知键剥掉。`toSceneV2` 把 version 1 补成空数组后的 version 2，供世界模拟使用；加载结果本身仍保留 version 1。 |
 | `version` 不是 `1` 或 `2`（含 ≥3、缺省、字符串、小数） | 拒绝。错误文本包含实际版本，以及 `accepted versions are 1 and 2`。不降级猜测。 |
 | 未知 entity `type` | 版本 1 与 2 都失败（与原 `schema.test.ts` 一致）。 |
 
-`SceneDocument.version` 的类型是 `1 | 2`。Phase 0 **不**把 v1 文档改写成 v2；世界系统还没有单独的 v2 代码路径。
+`SceneDocument.version` 的类型是 `1 | 2`。`loadScene` 不改写磁盘上的 version 1。世界系统调用 `toSceneV2` 后只走 version 2。
 
-现有包（`demo-scroll`、`qingming-riverside`、`_template`）保持 `version: 1`。脚手架仍写出 version 1，直到 Phase 1 改产 version 2。
+现有浏览包 `demo-scroll`、`qingming-riverside` 保持 `version: 1`。脚手架与 `_template` 从 Phase 1 起写出 version 2 空数组。夹具包 `path-walker` 是 version 2。
 
 ## 3. 新包约束（ADR 0003、0005）
 

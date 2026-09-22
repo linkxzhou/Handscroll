@@ -421,6 +421,7 @@ __metadata:
     "@handscroll/renderer-three": "workspace:*"
     "@handscroll/scene": "workspace:*"
     "@handscroll/tiles": "workspace:*"
+    "@handscroll/world": "workspace:*"
     typescript: "npm:^5.8.2"
     vite: "npm:^6.2.2"
   languageName: unknown
@@ -516,8 +517,20 @@ __metadata:
     "@handscroll/renderer-three": "workspace:*"
     "@handscroll/scene": "workspace:*"
     "@handscroll/tiles": "workspace:*"
+    "@handscroll/world": "workspace:*"
     typescript: "npm:^5.8.2"
     vite: "npm:^6.2.2"
+  languageName: unknown
+  linkType: soft
+
+"@handscroll/world@workspace:*, @handscroll/world@workspace:packages/world":
+  version: 0.0.0-use.local
+  resolution: "@handscroll/world@workspace:packages/world"
+  dependencies:
+    "@handscroll/animation": "workspace:*"
+    "@handscroll/core": "workspace:*"
+    "@handscroll/interaction": "workspace:*"
+    "@handscroll/scene": "workspace:*"
   languageName: unknown
   linkType: soft
 

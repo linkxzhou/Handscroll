@@ -18,6 +18,8 @@ import { ViewportController } from "./viewport/ViewportController.ts";
 import { InputManager } from "./input/InputManager.ts";
 import { RenderScheduler } from "./scheduler/RenderScheduler.ts";
 import type { HitResult } from "./contracts/hit.ts";
+import { TimeService } from "./time/TimeService.ts";
+import { TriggerRuntime } from "./triggers/TriggerRuntime.ts";
 
 export type { EngineServices } from "./contracts/engine.ts";
 
@@ -26,6 +28,8 @@ export class ScrollEngine implements ScrollEnginePublic {
   readonly camera: ViewportController;
   readonly scheduler: RenderScheduler;
   readonly plugins: PluginHost;
+  readonly time: TimeService;
+  private readonly triggers: TriggerRuntime;
 
   private readonly options: EngineCreateOptions;
   private readonly services: EngineServices;
@@ -54,6 +58,10 @@ export class ScrollEngine implements ScrollEnginePublic {
       screenHeight: options.container.clientHeight || 1,
     });
     this.scheduler = new RenderScheduler();
+    this.time = new TimeService(this.events);
+    this.triggers = new TriggerRuntime(this.events);
+    this.events.on("entity:click", (payload) => this.triggers.onEntityClick(payload));
+    this.events.on("chapter:arrive", (payload) => this.triggers.onChapterArrive(payload));
     this.plugins = new PluginHost(options.pluginRegistry, "warn");
     this.quality = options.quality ?? "auto";
     this.cachePolicy = { ...DEFAULT_CACHE_POLICY, ...options.cachePolicy };
@@ -91,6 +99,11 @@ export class ScrollEngine implements ScrollEnginePublic {
     const scene = await this.options.contentResolver.loadScene(scrollId);
     this.scene = scene;
     this.services.interaction.setEntities(scene.entities);
+    this.services.world.load(scene, {
+      activeMargin: meta.world?.activeMargin,
+      resolveUrl: (relativePath) => this.options.contentResolver.resolveUrl(scrollId, relativePath),
+    });
+    this.triggers.load(scene.triggers ?? []);
 
     this.camera.setScene(scene.meta);
     if (meta.defaultViewport) {
@@ -242,22 +255,36 @@ export class ScrollEngine implements ScrollEnginePublic {
     this.setQuality(this.quality);
   }
 
-  private frame(dt: number): void {
-    this.input?.update(dt);
-    this.camera.update(dt);
+  private frame(wallDt: number): void {
+    // Camera and pointer stay on the scheduler wall clock so flyTo duration
+    // stays in milliseconds and a pause still lets a chapter flight finish.
+    const gameDt = this.time.beginFrame(wallDt).gameDt;
+    this.input?.update(wallDt);
+    this.camera.update(wallDt);
     if (this.camera.isAnimating()) this.scheduler.requestContinuous("camera");
     else this.scheduler.releaseContinuous("camera");
 
     const vp = this.camera.getState();
     this.services.tiles.update(vp, this.cachePolicy, this.dpr);
-    this.services.animation.update(dt);
+    this.services.world.update(gameDt, vp);
+    this.services.interaction.sync(this.services.world.queryDynamic());
+    this.triggers.update({
+      cameraX: vp.centerX,
+      cameraY: vp.centerY,
+      zones: this.services.world.getZones(),
+      actorPosition: (id) => this.services.world.getActorPosition(id),
+    });
+    this.services.animation.update(gameDt);
+    if (this.services.world.needsContinuous()) this.scheduler.requestContinuous("world");
+    else this.scheduler.releaseContinuous("world");
 
     const tiles: readonly VisibleTile[] = this.services.tiles.getVisibleTiles();
     this.pixi?.setTiles?.(tiles);
+    this.pixi?.setActors?.(this.services.world.snapshots());
     this.pixi?.sync(vp);
     this.three?.sync(vp);
 
-    this.plugins.broadcastFrame(dt, vp);
+    this.plugins.broadcastFrame(gameDt, vp);
 
     this.pixi?.render();
     if (this.three?.needsThree?.()) this.three.render();
@@ -314,6 +341,11 @@ export class ScrollEngine implements ScrollEnginePublic {
     this.services.tiles.clear();
     this.services.animation.clear();
     this.services.interaction.setEntities([]);
+    this.services.interaction.sync([]);
+    this.services.world.clear();
+    this.triggers.reset();
+    this.pixi?.setActors?.([]);
+    this.scheduler.releaseContinuous("world");
     this.services.assets.cancelAll();
     this.scene = null;
     this.meta = null;

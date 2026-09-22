@@ -23,6 +23,7 @@ export default defineConfig({
       "@handscroll/renderer-pixi": path.resolve("packages/renderer-pixi/src/index.ts"),
       "@handscroll/renderer-three": path.resolve("packages/renderer-three/src/index.ts"),
       "@handscroll/plugins": path.resolve("packages/plugins/src/index.ts"),
+      "@handscroll/world": path.resolve("packages/world/src/index.ts"),
     },
   },
 });

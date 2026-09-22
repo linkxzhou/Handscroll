@@ -51,11 +51,65 @@ export async function validateContentPack(contentDir: string): Promise<Validatio
     if (meta.height !== scene.meta.height) {
       issues.push({ path: "scene.json.meta.height", message: `scene height ${scene.meta.height} != meta.height ${meta.height}` });
     }
+    const inside = (x: number, y: number) => x >= 0 && y >= 0 && x <= meta.width && y <= meta.height;
     for (const entity of scene.entities) {
       if (entity.type !== "hotspot") continue;
-      const inside = entity.x >= 0 && entity.y >= 0 && entity.x <= meta.width && entity.y <= meta.height;
-      if (!inside) {
+      if (!inside(entity.x, entity.y)) {
         issues.push({ path: `scene.json.entities.${entity.id}`, message: `hotspot origin (${entity.x}, ${entity.y}) is outside the world rect` });
+      }
+    }
+    if (scene.version === 2) {
+      const pathIds = new Set(scene.paths.map((path) => path.id));
+      const zoneIds = new Set(scene.zones.map((zone) => zone.id));
+      for (const path of scene.paths) {
+        path.points.forEach((point, index) => {
+          if (!inside(point.x, point.y)) {
+            issues.push({
+              path: `scene.json.paths.${path.id}.points.${index}`,
+              message: `path point (${point.x}, ${point.y}) is outside the world rect`,
+            });
+          }
+        });
+      }
+      for (const actor of scene.actors) {
+        if (!inside(actor.x, actor.y)) {
+          issues.push({
+            path: `scene.json.actors.${actor.id}`,
+            message: `actor origin (${actor.x}, ${actor.y}) is outside the world rect`,
+          });
+        }
+        if (actor.pathId && !pathIds.has(actor.pathId)) {
+          issues.push({
+            path: `scene.json.actors.${actor.id}.pathId`,
+            message: `path "${actor.pathId}" is not defined`,
+          });
+        }
+      }
+      for (const zone of scene.zones) {
+        if (!inside(zone.x, zone.y)) {
+          issues.push({
+            path: `scene.json.zones.${zone.id}`,
+            message: `zone origin (${zone.x}, ${zone.y}) is outside the world rect`,
+          });
+        }
+      }
+      for (const spawn of scene.spawns) {
+        if (!pathIds.has(spawn.pathId)) {
+          issues.push({
+            path: `scene.json.spawns.${spawn.id}.pathId`,
+            message: `path "${spawn.pathId}" is not defined`,
+          });
+        }
+      }
+      for (const trigger of scene.triggers) {
+        if (trigger.when.type === "zone:enter" || trigger.when.type === "zone:exit") {
+          if (!zoneIds.has(trigger.when.zoneId)) {
+            issues.push({
+              path: `scene.json.triggers.${trigger.id}.when.zoneId`,
+              message: `zone "${trigger.when.zoneId}" is not defined`,
+            });
+          }
+        }
       }
     }
   }

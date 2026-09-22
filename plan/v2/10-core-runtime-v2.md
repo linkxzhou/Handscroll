@@ -1,6 +1,6 @@
 # v2 核心运行时
 
-> **实施状态：** 待 Phase 1 · Phase 0 已完成
+> **实施状态：** Phase 1 已完成 · Phase 2 未开始
 
 > 目标：所有长卷共用的**游戏向**运行时。本层禁止画名、禁止 import `pixi.js` / `three`。  
 > 渲染器只消费纯数据快照。
@@ -170,7 +170,7 @@ atmosphere 插件可以听 `time:ofday` 改色调。没有监听者时，设值�
 
 ### 5.1 索引
 
-用真正的 AABB 树或网格（rbush / flatbush 均可，**实现前在 ADR 补一行选定**）。v1 的 `FlatbushIndex` 改名或替换，避免再出现「名叫索引、实际线性扫描且点击不调用它」。
+用真正的 AABB 索引。**选定：均匀网格，格宽 256 世界像素**（`packages/interaction` 的 `SpatialIndex`），不引入 rbush / flatbush。v1 的 `FlatbushIndex` 已替换；点击先查网格，再做精确形状测试。
 
 查询 API：
 

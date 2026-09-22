@@ -1,6 +1,6 @@
 # ADR 0003 — 世界角色用 Pixi，DOM 只做 HUD
 
-- Status: accepted for v2（规划；运行时尚未改）
+- Status: accepted for v2（Phase 1 已落地 `ActorSnapshot` 与 Pixi `ActorLayer`。夜色只乘瓦片、水面 underlay 仍待 Phase 2）
 - Date: 2026-09-22
 - 关系：扩展 [0001](../../adr/0001-renderer-topology.md)。0001 仍决定双 Canvas。本 ADR 决定什么东西允许出现在 `.ui-layer`。
 
@@ -38,6 +38,7 @@ DOM `.ui-layer` 只放 HUD：章节轨、解说面板、任务按钮、暂停、
 ## 后果
 
 - `RendererAdapter` 增加可选 `setActors`。旧测试替身可以不实现。
+- 空间索引选定均匀网格（256 世界像素一格，`SpatialIndex`），不引入 rbush / flatbush。点击仍走世界坐标，不打开 Pixi `eventMode`。
 - 命中仍走世界坐标拾取，不打开 Pixi `eventMode` 作为第二套点击。
 - 标签用渲染器文本，缩小时可能糊。是否改位图字体待测后再定。
 - Three 画布仍盖在整个 Pixi 之上。河上的船若要用本 ADR，水面不能无条件用全幅 Three 覆盖。该冲突由 [0005](./0005-occlusion-and-water-composite.md) 解决。默认答案不是把船退回 DOM。

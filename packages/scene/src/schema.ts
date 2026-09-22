@@ -17,6 +17,11 @@ export const MetaSchema = z.object({
   plugins: z.array(z.string()).default([]),
   pluginConfig: z.record(z.unknown()).optional(),
   storyEntry: z.string().default("./story/index.ts"),
+  world: z
+    .object({
+      activeMargin: z.number().positive().optional(),
+    })
+    .optional(),
   license: z.object({
     code: z.string().optional(),
     assets: z.string(),
@@ -83,6 +88,97 @@ const Model3dSchema = z.object({
   ownerPluginId: z.string().optional(),
 });
 
+const PathSchema = z.object({
+  id: z.string(),
+  points: z.array(z.object({ x: z.number(), y: z.number() })).min(2),
+  closed: z.boolean().optional(),
+});
+
+const ActorSchema = z.object({
+  id: z.string(),
+  kind: z.enum(["sprite", "marker", "label", "occluder"]),
+  x: z.number(),
+  y: z.number(),
+  zIndex: z.number().default(0),
+  width: z.number().positive(),
+  height: z.number().positive(),
+  anchorX: z.number().min(0).max(1).default(0.5),
+  anchorY: z.number().min(0).max(1).default(1),
+  imageUrl: z.string().optional(),
+  atlas: z.string().optional(),
+  frame: z.string().optional(),
+  frames: z.array(z.string()).optional(),
+  frameSeconds: z.number().positive().optional(),
+  pathId: z.string().optional(),
+  speed: z.number().nonnegative().optional(),
+  follow: z.enum(["once", "loop", "ping-pong"]).optional(),
+  distance: z.number().nonnegative().optional(),
+  label: z
+    .object({
+      i18nKey: z.string().optional(),
+      text: z.string().optional(),
+      cycleKeys: z.array(z.string()).optional(),
+      cycleSeconds: z.number().positive().optional(),
+    })
+    .optional(),
+  interactionPriority: z.number().optional(),
+  cull: z.boolean().default(true),
+  scaleTrack: z.array(z.object({ distance: z.number(), value: z.number() })).optional(),
+});
+
+const ZoneSchema = z.object({
+  id: z.string(),
+  x: z.number(),
+  y: z.number(),
+  shape: z.union([RectShape, CircleShape, PolygonShape]),
+  chapterId: z.string().optional(),
+});
+
+const SpawnSchema = z.object({
+  id: z.string(),
+  pathId: z.string(),
+  count: z.number().int().positive().max(64),
+  speedMin: z.number().positive(),
+  speedMax: z.number().positive(),
+  atlas: z.string(),
+  frames: z.array(z.string()).min(1),
+  follow: z.enum(["loop", "ping-pong"]).default("ping-pong"),
+  seed: z.number().int(),
+  width: z.number().positive(),
+  height: z.number().positive(),
+});
+
+const DialogueStubSchema = z.object({
+  id: z.string(),
+  lineKeys: z.array(z.string()).min(1),
+});
+
+const TriggerWhenSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("zone:enter"),
+    zoneId: z.string(),
+    subject: z.enum(["camera", "actor"]),
+    actorId: z.string().optional(),
+  }),
+  z.object({
+    type: z.literal("zone:exit"),
+    zoneId: z.string(),
+    subject: z.enum(["camera", "actor"]),
+    actorId: z.string().optional(),
+  }),
+  z.object({ type: z.literal("entity:click"), entityId: z.string() }),
+  z.object({ type: z.literal("chapter:enter"), chapterId: z.string() }),
+  z.object({ type: z.literal("custom"), event: z.string() }),
+]);
+
+const TriggerSchema = z.object({
+  id: z.string(),
+  when: TriggerWhenSchema,
+  emit: z.string(),
+  once: z.boolean().optional(),
+  payload: z.unknown().optional(),
+});
+
 const sceneCommon = {
   meta: z.object({
     id: z.string(),
@@ -107,13 +203,6 @@ const sceneCommon = {
     .default([]),
 };
 
-/**
- * Phase 0 keeps version 2 arrays opaque.
- * Element schemas (path / actor / zone / spawn / dialogue / trigger) are Phase 1.
- * Unknown keys on the document are stripped, not rejected (Zod's default).
- */
-const deferredWorldArray = () => z.array(z.unknown()).default([]);
-
 /** Published v1 shape. World arrays are not part of this document and are stripped. */
 export const SceneSchemaV1 = z.object({
   version: z.literal(1),
@@ -122,24 +211,55 @@ export const SceneSchemaV1 = z.object({
 
 /**
  * Version 2 is a superset of v1 (ADR 0004).
- * Missing world arrays default to `[]`. Elements are preserved and not interpreted.
+ * Missing world arrays default to `[]`.
  */
 export const SceneSchemaV2 = SceneSchemaV1.extend({
   version: z.literal(2),
-  paths: deferredWorldArray(),
-  actors: deferredWorldArray(),
-  zones: deferredWorldArray(),
-  spawns: deferredWorldArray(),
-  dialogues: deferredWorldArray(),
-  triggers: deferredWorldArray(),
+  paths: z.array(PathSchema).default([]),
+  actors: z.array(ActorSchema).default([]),
+  zones: z.array(ZoneSchema).default([]),
+  spawns: z.array(SpawnSchema).default([]),
+  dialogues: z.array(DialogueStubSchema).default([]),
+  triggers: z.array(TriggerSchema).default([]),
 });
 
-export type SceneJson = z.infer<typeof SceneSchemaV1> | z.infer<typeof SceneSchemaV2>;
+export type SceneV1 = z.infer<typeof SceneSchemaV1>;
+export type SceneV2 = z.infer<typeof SceneSchemaV2>;
+export type SceneJson = SceneV1 | SceneV2;
+
+/**
+ * Runtime helper. Version 1 becomes version 2 with empty world arrays.
+ * It does not invent actors from story code.
+ */
+export function toSceneV2(doc: SceneV1 | SceneV2): SceneV2 {
+  if (doc.version === 2) {
+    return {
+      ...doc,
+      version: 2,
+      paths: doc.paths ?? [],
+      actors: doc.actors ?? [],
+      zones: doc.zones ?? [],
+      spawns: doc.spawns ?? [],
+      dialogues: doc.dialogues ?? [],
+      triggers: doc.triggers ?? [],
+    };
+  }
+  return {
+    ...doc,
+    version: 2,
+    paths: [],
+    actors: [],
+    zones: [],
+    spawns: [],
+    dialogues: [],
+    triggers: [],
+  };
+}
 
 /**
  * Accepts scene `version` 1 and 2. Rejects every other value, including ≥ 3,
- * with an error that names the version. Does not rewrite v1 into v2
- * (`toSceneV2` is Phase 1).
+ * with an error that names the version. Parsing does not rewrite v1 into v2;
+ * call `toSceneV2` for the single runtime path.
  */
 export const SceneSchema = z
   .object({ version: z.unknown().optional() })

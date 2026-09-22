@@ -1,2 +1,3 @@
-export { InteractionManager, FlatbushIndex } from "./InteractionManager.ts";
-export { pick, pickAll, pointInHotspot } from "./pick.ts";
+export { InteractionManager } from "./InteractionManager.ts";
+export { SpatialIndex, SPATIAL_CELL_SIZE } from "./SpatialIndex.ts";
+export { pick, pickAll, pointInHotspot, resolveHits } from "./pick.ts";

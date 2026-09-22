@@ -1,3 +1,5 @@
+import { pointAlong as pointAlongPath, polylineLength as polylineLengthPath } from "@handscroll/animation";
+
 /** Reference runtime origin sits on the center panel; engine world is the 6516-wide stitch. */
 export const REF_SHIFT_X = 2172;
 export const WORLD_WIDTH = 6516;
@@ -100,31 +102,11 @@ export function worldToScreen(
 }
 
 export function polylineLength(points: readonly WorldPoint[]): number {
-  let length = 0;
-  for (let i = 1; i < points.length; i += 1) {
-    const a = points[i - 1]!;
-    const b = points[i]!;
-    length += Math.hypot(b.x - a.x, b.y - a.y);
-  }
-  return length;
+  return polylineLengthPath(points);
 }
 
 export function pointAlong(points: readonly WorldPoint[], distance: number): WorldPoint {
-  if (points.length === 0) return { x: 0, y: 0 };
-  if (points.length === 1) return { x: points[0]!.x, y: points[0]!.y };
-  let remaining = Math.max(0, distance);
-  for (let i = 1; i < points.length; i += 1) {
-    const a = points[i - 1]!;
-    const b = points[i]!;
-    const seg = Math.hypot(b.x - a.x, b.y - a.y);
-    if (remaining <= seg || i === points.length - 1) {
-      const t = seg === 0 ? 0 : Math.min(1, remaining / seg);
-      return { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t };
-    }
-    remaining -= seg;
-  }
-  const last = points[points.length - 1]!;
-  return { x: last.x, y: last.y };
+  return pointAlongPath(points, distance);
 }
 
 export function inActiveZone(

@@ -12,7 +12,8 @@
       "@handscroll/animation": ["./packages/animation/src/index.ts"],
       "@handscroll/renderer-pixi": ["./packages/renderer-pixi/src/index.ts"],
       "@handscroll/renderer-three": ["./packages/renderer-three/src/index.ts"],
-      "@handscroll/plugins": ["./packages/plugins/src/index.ts"]
+      "@handscroll/plugins": ["./packages/plugins/src/index.ts"],
+      "@handscroll/world": ["./packages/world/src/index.ts"]
     }
   },
   "include": [

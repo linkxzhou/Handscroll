@@ -24,6 +24,7 @@ export function createFetchResolver(options: FetchResolverOptions = {}): Content
         pluginConfig: meta.pluginConfig,
         defaultViewport: meta.defaultViewport,
         storyEntry: meta.storyEntry,
+        world: meta.world,
       };
     },
     async loadManifest(scrollId: string): Promise<unknown> {

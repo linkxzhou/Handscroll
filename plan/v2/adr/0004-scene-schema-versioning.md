@@ -1,6 +1,6 @@
 # ADR 0004 — 场景 schema 版本与迁移
 
-- Status: accepted for v2（Phase 0 起加载器接受 version 1 与 2、拒绝 ≥3；元素形状与 `toSceneV2` 仍待 Phase 1。决策未改）
+- Status: accepted for v2（Phase 1 已落地元素 schema 与 `toSceneV2`。决策未改：version 1 与 2 可加载，≥3 拒绝）
 - Date: 2026-09-22
 - 关系：v1 形状即 `packages/scene/src/schema.ts` 的 `version: z.literal(1)`。
 

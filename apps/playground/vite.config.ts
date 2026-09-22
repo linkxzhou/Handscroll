@@ -61,6 +61,7 @@ export default defineConfig({
       "@handscroll/renderer-pixi": path.join(repoRoot, "packages/renderer-pixi/src/index.ts"),
       "@handscroll/renderer-three": path.join(repoRoot, "packages/renderer-three/src/index.ts"),
       "@handscroll/plugins": path.join(repoRoot, "packages/plugins/src/index.ts"),
+      "@handscroll/world": path.join(repoRoot, "packages/world/src/index.ts"),
     },
   },
 });

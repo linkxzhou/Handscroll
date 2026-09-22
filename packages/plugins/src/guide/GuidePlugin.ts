@@ -8,6 +8,7 @@ export const createGuidePlugin: PluginFactory = (raw): ScrollPlugin => {
   const config = (raw ?? {}) as GuideConfig;
   let rail: HTMLElement | null = null;
   let ctx: EngineContext | null = null;
+  let pendingArrive: { id: string; centerX: number; centerY: number; zoom: number } | null = null;
 
   return {
     id: "guide",
@@ -41,13 +42,32 @@ export const createGuidePlugin: PluginFactory = (raw): ScrollPlugin => {
             zoom: chapter.zoom,
             duration: 800,
           });
+          pendingArrive = {
+            id: chapter.id,
+            centerX: chapter.centerX,
+            centerY: chapter.centerY,
+            zoom: chapter.zoom,
+          };
           scheduler.requestContinuous("camera");
           scheduler.requestFrame();
         });
         rail.appendChild(btn);
       }
     },
+    onFrame() {
+      if (!pendingArrive || !ctx) return;
+      const camera = ctx.engine.camera;
+      if (camera.isAnimating?.()) return;
+      const vp = camera.getState();
+      const near =
+        Math.hypot(vp.centerX - pendingArrive.centerX, vp.centerY - pendingArrive.centerY) <= 8 &&
+        Math.abs(vp.zoom - pendingArrive.zoom) <= 0.05;
+      const arrived = pendingArrive;
+      pendingArrive = null;
+      if (near) ctx.engine.events.emit("chapter:arrive", { id: arrived.id });
+    },
     onSceneUnload() {
+      pendingArrive = null;
       rail?.replaceChildren();
     },
     onDestroy() {

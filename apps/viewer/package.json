@@ -18,7 +18,8 @@
     "@handscroll/renderer-pixi": "workspace:*",
     "@handscroll/renderer-three": "workspace:*",
     "@handscroll/scene": "workspace:*",
-    "@handscroll/tiles": "workspace:*"
+    "@handscroll/tiles": "workspace:*",
+    "@handscroll/world": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.8.2",
