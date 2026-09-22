@@ -13,7 +13,8 @@
 | **有效** | [v2/20-gameplay-plugins-v2.md](./v2/20-gameplay-plugins-v2.md) | crowd / vessel / atmosphere / guide / audio zones |
 | **有效** | [v2/30-content-pack-v2.md](./v2/30-content-pack-v2.md) | 多画卷内容包、作者流、第二包、授权 |
 | **有效** | [v2/40-migration-qingming.md](./v2/40-migration-qingming.md) | 清明上河图式街市卷如何迁到 v2，而不是继续定义引擎 |
-| **有效** | [v2/50-roadmap.md](./v2/50-roadmap.md) | 阶段与退出条件（相对工作量 S/M/L） |
+| **有效** | [v2/50-roadmap.md](./v2/50-roadmap.md) | 阶段与退出条件（相对工作量 S/M/L）；顶部有实施状态 |
+| **有效** | [v2/60-frozen-v1-api.md](./v2/60-frozen-v1-api.md) | Phase 0 冻结的迁移安全 API 与 scene 版本门 |
 | **有效** | [v2/adr/](./v2/adr/) | v2 决策：世界角色用 Pixi、schema 版本、遮挡与水面合成 |
 
 ## v1 baseline（shipped 2026-09）

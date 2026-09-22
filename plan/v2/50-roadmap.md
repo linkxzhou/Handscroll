@@ -3,6 +3,20 @@
 > 排序原则：先让**第二幅不同类型的画**少写代码，再打磨清明上河图的表现，最后才做编辑器。  
 > 工作量是相对大小（S/M/L），不是日历。没有历史速度数据，不估周数。
 
+## 实施状态
+
+状态取值：`未开始` | `进行中` | `已完成` | `阻塞`。完成日期按 Asia/Shanghai。
+
+| Phase | 名称 | 状态 | 完成日期 | PR |
+|---|---|---|---|---|
+| 0 | 冻结 v1 表面 + 版本政策 | 已完成 | 2026-09-22 | （打开 PR 后填入） |
+| 1 | 世界实体 + 路径跟随 + scene v2 | 未开始 | — | — |
+| 2 | crowd / vessel / atmosphere + 街市离开 DOM | 未开始 | — | — |
+| 3 | 非清明上河图类型的第二包 | 未开始 | — | — |
+| 4 | 作者打磨 / 轻量拾取 | 未开始 | — | — |
+
+Phase 0 的冻结 API 与 schema 门见 [60-frozen-v1-api.md](./60-frozen-v1-api.md)。ADR 0003 / 0004 / 0005 仍为 accepted，本阶段不重开。
+
 ## 1. 阶段
 
 ```text
@@ -22,7 +36,7 @@ Phase 3 的图可以在 Phase 1 之后先切瓦片，但「多画卷成立」的
 - 把今天的 scene `version: 1` 视为已发布形状
 - 采纳 [adr/0004](./adr/0004-scene-schema-versioning.md)：加载器接受 1 与 2；≥3 拒绝
 - 采纳 [adr/0003](./adr/0003-world-actors-pixi.md) 与 [adr/0005](./adr/0005-occlusion-and-water-composite.md)。新包不得再增加 DOM 世界角色
-- 列一份迁移前不改语义的 API：`loadContent`、`HitResult`、`weather:set`、`camera.flyTo`、`requestContinuous`
+- 列一份迁移前不改语义的 API：`loadContent`、`HitResult`、`weather:set`、`camera.flyTo`、`requestContinuous`（全文见 [60-frozen-v1-api.md](./60-frozen-v1-api.md)）
 - `test:dep` 继续禁止 core import pixi/three
 
 **不做：** 搬迁街市、加角色层。
