@@ -1,5 +1,7 @@
 # Dual-canvas renderer topology
 
+> **v1 baseline（shipped 2026-09）** — 双 Canvas 决定仍然有效。世界角色 vs DOM HUD 见 [../v2/adr/0003-world-actors-pixi.md](../v2/adr/0003-world-actors-pixi.md)。
+
 - Status: accepted for v1 (Phase 0–E2)
 - Date: 2026-09-21
 

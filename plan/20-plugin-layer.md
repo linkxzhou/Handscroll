@@ -1,5 +1,7 @@
 # 插件层详细实现计划
 
+> **v1 baseline（shipped 2026-09）** — 历史基线。玩法插件见 [v2/20-gameplay-plugins-v2.md](./v2/20-gameplay-plugins-v2.md)。
+
 > 对应总览：[01-engine-implementation.md](./01-engine-implementation.md)  
 > 关联：[10-core-engine.md](./10-core-engine.md) · [30-business-layer.md](./30-business-layer.md)
 

@@ -1,5 +1,7 @@
 # 核心引擎层详细实现计划
 
+> **v1 baseline（shipped 2026-09）** — 历史基线。运行时升级见 [v2/10-core-runtime-v2.md](./v2/10-core-runtime-v2.md)。
+
 > 对应总览：[01-engine-implementation.md](./01-engine-implementation.md)  
 > 关联：[20-plugin-layer.md](./20-plugin-layer.md) · [30-business-layer.md](./30-business-layer.md)
 
